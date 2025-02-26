@@ -25,6 +25,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("mysql:mysql-connector-java:8.0.33")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation("com.itextpdf:itext7-core:7.2.5")
 }
 
 tasks.withType<Test> {

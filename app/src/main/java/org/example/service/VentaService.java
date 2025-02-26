@@ -62,7 +62,15 @@ public class VentaService {
         venta.setTotal(totalVenta);
 
         // Guardar la venta (cascada también guardará los detalles)
-        return ventaRepository.save(venta);
+        Venta nuevaVenta = ventaRepository.save(venta);
+
+        // Generar ticket en PDF
+        TicketService ticketService = new TicketService();
+        String ticketPath = ticketService.generarTicketPDF(nuevaVenta);
+        System.out.println("Ticket generado en: " + ticketPath);
+
+        return nuevaVenta;
+
     }
 
     // Eliminar una venta
