@@ -14,13 +14,15 @@ public class DetalleVenta {
     @ManyToOne
     @JoinColumn(name = "venta_id", nullable = false)
     @JsonBackReference  // Prevent infinite recursion
-    private Venta venta;
+    private Venta venta; //Reference to venta
 
     @ManyToOne
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
     private Integer cantidad;
+    
+    private Double precio;
 
     private Double subtotal;
 
@@ -36,8 +38,15 @@ public class DetalleVenta {
 
     public Integer getCantidad() { return cantidad; }
     public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+    
+    public Double getPrecio() { return precio;}
+    public void setPrecio(Double precio) { this.precio = precio;}
 
     public Double getSubtotal() { return subtotal; }
     public void setSubtotal(Double subtotal) { this.subtotal = subtotal; }
+    
+ 
+
+    
 }
 

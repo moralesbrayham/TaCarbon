@@ -31,6 +31,7 @@ public class TicketService {
 
             document.add(new Paragraph("Fecha: " + venta.getFecha()));
             document.add(new Paragraph("ID Venta: " + venta.getId()));
+            document.add(new Paragraph("Numero de mesa" + venta.getNumeroMesa()));
             document.add(new Paragraph("\n"));
 
             // Crear tabla para los detalles de la venta

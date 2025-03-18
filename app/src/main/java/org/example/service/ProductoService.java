@@ -23,7 +23,7 @@ public class ProductoService {
     public Optional<Producto> obtenerProductoPorId(Long id) {
         return productoRepository.findById(id);
     }
-
+    
     // Método para guardar un nuevo producto
     public Producto guardarProducto(Producto producto) {
         return productoRepository.save(producto);

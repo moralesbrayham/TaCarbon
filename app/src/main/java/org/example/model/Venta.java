@@ -13,10 +13,14 @@ public class Venta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     
     private Long id;
+    
+    private int numeroMesa;
 
     private LocalDateTime fecha;
 
     private Double total;
+    
+    
 
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference  // Prevent infinite recursion
@@ -25,6 +29,9 @@ public class Venta {
     // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public int getNumeroMesa() {return numeroMesa;}
+    public void setNumeroMesa(int numeroMesa) { this.numeroMesa = numeroMesa;}
 
     public LocalDateTime getFecha() { return fecha; }
     public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
