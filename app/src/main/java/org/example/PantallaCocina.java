@@ -4,18 +4,153 @@
  */
 package org.example;
 
+// DTOs (ajusta el paquete según corresponda)
+
+// Timer para refresco automático
+import javax.swing.Timer;
+
+// Layout
+
+// HTTP y JSON
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+
+// JSON (Gson)
+import com.google.gson.Gson;
+import java.awt.BorderLayout;
+import java.io.OutputStream;
+
+// Listas y estructuras
+import java.util.List;
+import java.util.Map;
+
+import java.util.stream.Collectors;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+
+
+
 /**
  *
  * @author moral
  */
 public class PantallaCocina extends javax.swing.JFrame {
+    private Timer actualizador;
+
 
     /**
      * Creates new form PantallaCocina
      */
     public PantallaCocina() {
         initComponents();
+        panelOrdenes.setLayout(new BoxLayout(panelOrdenes, BoxLayout.Y_AXIS));
+        iniciarActualizacion();
     }
+    
+    private void iniciarActualizacion() {
+        actualizador = new Timer(3000, e -> cargarOrdenes()); // actualiza cada 3 segundos
+        actualizador.start();
+    }
+    
+    private void cargarOrdenes() {
+        try {
+            URL url = new URL("http://localhost:8080/api/ventas/pendientes");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                    String response = br.lines().collect(Collectors.joining());
+                    actualizarPanelOrdenes(response);
+                }
+            }
+
+            conn.disconnect();
+        } catch (Exception e) {
+            System.out.println("Error al cargar órdenes: " + e.getMessage());
+        }
+    }
+    
+    private void actualizarPanelOrdenes(String jsonResponse) {
+        panelOrdenes.removeAll();
+        Gson gson = new Gson();
+        List<Map<String, Object>> ordenes = gson.fromJson(jsonResponse, List.class);
+
+        for (Map<String, Object> orden : ordenes) {
+            int id = ((Double) orden.get("id")).intValue();
+            int mesa = ((Double) orden.get("numeroMesa")).intValue();
+            String estado = (String) orden.get("estado");
+
+            JPanel card = new JPanel(new BorderLayout());
+            card.setBorder(BorderFactory.createTitledBorder("Orden #" + id + " - Mesa " + mesa));
+
+            JTextArea areaDetalles = new JTextArea("Detalles aquí...");
+            areaDetalles.setEditable(false);
+
+            JButton btnEstado = new JButton(estado);
+            btnEstado.addActionListener(e -> cambiarEstado(id, btnEstado));
+
+            card.add(areaDetalles, BorderLayout.CENTER);
+            card.add(btnEstado, BorderLayout.SOUTH);
+
+            panelOrdenes.add(card);
+        }
+
+        panelOrdenes.revalidate();
+        panelOrdenes.repaint();
+    }
+    
+    private void cambiarEstado(int idOrden, JButton boton) {
+        String estadoActual = boton.getText();
+        String nuevoEstado;
+
+        switch (estadoActual) {
+            case "En espera":
+                nuevoEstado = "En preparación";
+                break;
+            case "En preparación":
+                nuevoEstado = "Orden lista";
+                break;
+            case "Orden lista":
+                return;
+            default:
+                return;
+        }
+
+        try {
+            URL url = new URL("http://localhost:8080/api/ventas/" + idOrden + "/estado");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("PUT");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
+
+            String cuerpo = "{\"estado\":\"" + nuevoEstado + "\"}";
+
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(cuerpo.getBytes("utf-8"));
+            }
+
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                boton.setText(nuevoEstado);
+                if (nuevoEstado.equals("Orden lista")) {
+                    JOptionPane.showMessageDialog(this, "¡Orden #" + idOrden + " está lista!");
+                }
+            }
+
+            conn.disconnect();
+        } catch (Exception e) {
+            System.out.println("Error al cambiar estado: " + e.getMessage());
+        }
+    }
+
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -26,33 +161,81 @@ public class PantallaCocina extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        btnMenuPrincipal = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        panelOrdenes = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Punto de Venta TaCarbon");
 
-        jLabel1.setFont(new java.awt.Font("Yu Gothic Medium", 1, 48)); // NOI18N
-        jLabel1.setText("PEDIDOS EN COCINA");
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setPreferredSize(new java.awt.Dimension(800, 600));
+
+        btnMenuPrincipal.setBackground(new java.awt.Color(220, 220, 220));
+        btnMenuPrincipal.setFont(new java.awt.Font("Bell MT", 1, 18)); // NOI18N
+        btnMenuPrincipal.setText("Menu Principal");
+        btnMenuPrincipal.setBorder(new javax.swing.border.MatteBorder(null));
+        btnMenuPrincipal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMenuPrincipalActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout panelOrdenesLayout = new javax.swing.GroupLayout(panelOrdenes);
+        panelOrdenes.setLayout(panelOrdenesLayout);
+        panelOrdenesLayout.setHorizontalGroup(
+            panelOrdenesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 798, Short.MAX_VALUE)
+        );
+        panelOrdenesLayout.setVerticalGroup(
+            panelOrdenesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 542, Short.MAX_VALUE)
+        );
+
+        jScrollPane1.setViewportView(panelOrdenes);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(0, 650, Short.MAX_VALUE)
+                .addComponent(btnMenuPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(jScrollPane1)
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(btnMenuPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 544, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(150, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addGap(139, 139, 139))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(145, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(143, 143, 143))
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+
+    
+    private void btnMenuPrincipalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMenuPrincipalActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+    
+        // Open the MainPOSWindow
+        MainPOSWindow mainWindow = new MainPOSWindow();
+        mainWindow.setVisible(true);  // Show the MainPOSWindow
+    }//GEN-LAST:event_btnMenuPrincipalActionPerformed
 
     /**
      * @param args the command line arguments
@@ -90,6 +273,9 @@ public class PantallaCocina extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton btnMenuPrincipal;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPanel panelOrdenes;
     // End of variables declaration//GEN-END:variables
 }

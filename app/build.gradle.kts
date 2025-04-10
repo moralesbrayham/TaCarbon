@@ -26,6 +26,10 @@ dependencies {
     implementation("mysql:mysql-connector-java:8.0.33")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     implementation("com.itextpdf:itext7-core:7.2.5")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("org.apache.pdfbox:pdfbox:2.0.30") // Use latest version
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.0")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.0")
 }
 
 tasks.withType<Test> {
@@ -36,9 +40,9 @@ tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("--enable-preview")
 }
 
+
 sourceSets {
     main {
         resources.setSrcDirs(listOf("src/main/resources"))
     }
 }
-

@@ -5,6 +5,9 @@ import org.example.model.DetalleVenta;
 import org.example.model.Producto;
 import org.example.repository.VentaRepository;
 import org.example.repository.ProductoRepository;
+import org.example.dto.VentaDTO;
+import org.example.dto.ItemDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import org.example.repository.DetalleVentaRepository;
 
 @Service
 public class VentaService {
@@ -36,6 +41,8 @@ public class VentaService {
     // Registrar una nueva venta
     @Transactional
     public Venta realizarVenta(Venta venta) {
+        // Set default status
+        venta.setEstado("En espera");
         venta.setFecha(LocalDateTime.now()); // Ajustar fecha/tiempo actual
         double totalVenta = 0;
 
@@ -81,7 +88,30 @@ public class VentaService {
         }
     }
     
+    public List<VentaDTO> obtenerOrdenesPendientes() {
+        List<Venta> ventas = ventaRepository.findByEstado("En espera"); // o el estado que definas
+
+        return ventas.stream().map(v -> {
+            List<ItemDTO> productos = v.getDetalles().stream()
+                .map(d -> new ItemDTO(d.getProducto().getNombre(), d.getCantidad()))
+                .collect(Collectors.toList());
+
+            return new VentaDTO(v.getId(), v.getNumeroMesa(), v.getEstado(), productos);
+        }).collect(Collectors.toList());
+    }
+
+    
+    public void actualizarEstado(Long idVenta, String nuevoEstado) {
+        Optional<Venta> ventaOptional = ventaRepository.findById(idVenta);
+
+        if (ventaOptional.isPresent()) {
+            Venta venta = ventaOptional.get();
+            venta.setEstado(nuevoEstado);
+            ventaRepository.save(venta);
+        } else {
+            throw new RuntimeException("Venta no encontrada con ID: " + idVenta);
+        }
+    }
+
+    
 }
-
-
-

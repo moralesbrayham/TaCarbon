@@ -3,14 +3,30 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package org.example;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.time.LocalDate;
-import java.util.List;
 import org.example.service.VentaService;
 import org.example.service.ReporteService;
 import org.example.model.Venta;
 import org.springframework.beans.factory.annotation.Autowired;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import org.example.util.JsonUtil;
+
+
 
 
 
@@ -49,9 +65,12 @@ public class Estadisticas extends javax.swing.JFrame {
         metodosCombo = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
         resultadosTable = new javax.swing.JTable();
+        btnMenuPrincipal = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Punto de venta TaCarbon - Estadisticas y Reportes");
+
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel1.setFont(new java.awt.Font("Yu Gothic Medium", 1, 24)); // NOI18N
         jLabel1.setText("ESTADISTICAS Y REPORTES");
@@ -82,40 +101,56 @@ public class Estadisticas extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(resultadosTable);
 
+        btnMenuPrincipal.setBackground(new java.awt.Color(220, 220, 220));
+        btnMenuPrincipal.setFont(new java.awt.Font("Bell MT", 1, 18)); // NOI18N
+        btnMenuPrincipal.setText("Menu Principal");
+        btnMenuPrincipal.setBorder(new javax.swing.border.MatteBorder(null));
+        btnMenuPrincipal.setPreferredSize(new java.awt.Dimension(150, 50));
+        btnMenuPrincipal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMenuPrincipalActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addGap(6, 6, 6)
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(opcionesCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(metodosCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(30, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 753, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(metodosCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 179, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnMenuPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 24, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 753, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(19, 19, 19))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnMenuPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(opcionesCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(metodosCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(7, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 433, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -135,7 +170,7 @@ public class Estadisticas extends javax.swing.JFrame {
     private void opcionesComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_opcionesComboActionPerformed
         // TODO add your handling code here:
         String seleccion = (String) opcionesCombo.getSelectedItem();
-    metodosCombo.removeAllItems();
+        metodosCombo.removeAllItems();
 
     if ("Ventas".equals(seleccion)) {
         metodosCombo.addItem("Obtener Todas las Ventas");
@@ -149,87 +184,174 @@ public class Estadisticas extends javax.swing.JFrame {
     }//GEN-LAST:event_opcionesComboActionPerformed
 
     private void metodosComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_metodosComboActionPerformed
-        // TODO add your handling code here:
-        String seleccion = (String) opcionesCombo.getSelectedItem();
+    String seleccion = (String) opcionesCombo.getSelectedItem();
     String metodoSeleccionado = (String) metodosCombo.getSelectedItem();
-
+    
     if (seleccion == null || metodoSeleccionado == null) return;
     
-
     DefaultTableModel tableModel = new DefaultTableModel();
     resultadosTable.setModel(tableModel);
 
-    if ("Ventas".equals(seleccion)) {
-        if ("Obtener Todas las Ventas".equals(metodoSeleccionado)) {
-            List<Venta> ventas = ventaService.obtenerTodasLasVentas();
-            tableModel.addColumn("ID");
-            tableModel.addColumn("Fecha");
-            tableModel.addColumn("Total");
+    HttpClient client = HttpClient.newHttpClient();
+    ObjectMapper mapper = JsonUtil.getObjectMapper(); // Use ObjectMapper with JavaTimeModule
+    
+    try (Connection conn = DriverManager.getConnection(
+            "jdbc:mysql://localhost:3306/tacarbon_db?createDatabaseIfNotExist=true", "root", "m1o3r5a7")) 
+    
+    {
+        if ("Ventas".equals(seleccion)) {
+            if ("Obtener Todas las Ventas".equals(metodoSeleccionado)) {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8080/api/ventas"))
+                        .GET()
+                        .build();
 
-            for (Venta v : ventas) {
-                tableModel.addRow(new Object[]{v.getId(), v.getFecha(), v.getTotal()});
-            }
-            
-        } else if ("Obtener Venta por ID".equals(metodoSeleccionado)) {
-            String id = JOptionPane.showInputDialog("Ingrese el ID de la venta:");
-            try {
-                Long ventaId = Long.parseLong(id);
-                ventaService.obtenerVentaPorId(ventaId).ifPresent(v -> {
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                if (response.statusCode() == 200) {
+                    List<Venta> ventas = mapper.readValue(response.body(), new TypeReference<List<Venta>>() {});
+
                     tableModel.addColumn("ID");
                     tableModel.addColumn("Fecha");
                     tableModel.addColumn("Total");
-                    tableModel.addRow(new Object[]{v.getId(), v.getFecha(), v.getTotal()});
-                });
-            } catch (NumberFormatException e) {
+
+                    for (Venta v : ventas) {
+                        tableModel.addRow(new Object[]{v.getId(), v.getFecha(), v.getTotal()});
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Error al obtener ventas: " + response.body());
+                }
+            } else if ("Obtener Venta por ID".equals(metodoSeleccionado)) {
+                String id = JOptionPane.showInputDialog("Ingrese el ID de la venta:");
+                try {
+                    Long ventaId = Long.parseLong(id);
+
+                    HttpRequest request = HttpRequest.newBuilder()
+                            .uri(URI.create("http://localhost:8080/api/ventas/" + ventaId))
+                            .GET()
+                            .build();
+
+                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                    if (response.statusCode() == 200) {
+                        Venta venta = mapper.readValue(response.body(), Venta.class);
+
+                        tableModel.addColumn("ID");
+                        tableModel.addColumn("Fecha");
+                        tableModel.addColumn("Total");
+                        tableModel.addRow(new Object[]{venta.getId(), venta.getFecha(), venta.getTotal()});
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Venta no encontrada.");
+                    }
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this, "ID inválido.");
+                }
+            } else if ("Eliminar Venta".equals(metodoSeleccionado)) {
+                String id = JOptionPane.showInputDialog("Ingrese el ID de la venta a eliminar:");
+                try {
+                    Long ventaId = Long.parseLong(id);
+
+                    HttpRequest request = HttpRequest.newBuilder()
+                            .uri(URI.create("http://localhost:8080/api/ventas/" + ventaId))
+                            .DELETE()
+                            .build();
+
+                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                    if (response.statusCode() == 204) {
+                        JOptionPane.showMessageDialog(this, "Venta eliminada exitosamente.");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Error al eliminar venta.");
+                    }
+                }catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "ID inválido.");
+                }   
             }
-        } else if ("Eliminar Venta".equals(metodoSeleccionado)) {
-            String id = JOptionPane.showInputDialog("Ingrese el ID de la venta a eliminar:");
-            try {
-                Long ventaId = Long.parseLong(id);
-                ventaService.eliminarVenta(ventaId);
-                JOptionPane.showMessageDialog(this, "Venta eliminada exitosamente.");
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "ID inválido.");
+            } else if ("Estadísticas".equals(seleccion)) {
+            if ("Obtener Ventas por Fecha".equals(metodoSeleccionado)) {
+                String fechaStr = JOptionPane.showInputDialog("Ingrese la fecha (YYYY-MM-DD):");
+                LocalDate fecha = LocalDate.parse(fechaStr);
+
+                String sql = "SELECT id, fecha, total FROM venta WHERE fecha BETWEEN ? AND ?";
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setTimestamp(1, Timestamp.valueOf(fecha.atStartOfDay()));
+                    stmt.setTimestamp(2, Timestamp.valueOf(fecha.plusDays(1).atStartOfDay()));
+                    
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        tableModel.addColumn("ID");
+                        tableModel.addColumn("Fecha");
+                        tableModel.addColumn("Total");
+
+                        while (rs.next()) {
+                            tableModel.addRow(new Object[]{
+                                rs.getLong("id"), 
+                                rs.getTimestamp("fecha").toLocalDateTime(), // Ensure format consistency
+                                rs.getDouble("total")
+                            });
+                        }
+                    }
+                }
+            } else if ("Obtener Productos Más Vendidos".equals(metodoSeleccionado)) {
+                String sql = """
+                    SELECT p.nombre, SUM(d.cantidad) AS total_vendido
+                    FROM detalle_venta d
+                    JOIN productos p ON d.producto_id = p.id
+                    GROUP BY p.nombre
+                    ORDER BY total_vendido DESC
+                """;
+
+                try (Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery(sql)) {
+
+                    tableModel.addColumn("Producto");
+                    tableModel.addColumn("Cantidad Vendida");
+
+                    while (rs.next()) {
+                        tableModel.addRow(new Object[]{
+                            rs.getString("nombre"),
+                            rs.getInt("total_vendido")
+                        });
+                    }
+                }
+            } else if ("Obtener Ingresos por Período".equals(metodoSeleccionado)) {
+                String inicio = JOptionPane.showInputDialog("Ingrese la fecha de inicio (YYYY-MM-DD):");
+                String fin = JOptionPane.showInputDialog("Ingrese la fecha de fin (YYYY-MM-DD):");
+
+                LocalDate fechaInicio = LocalDate.parse(inicio);
+                LocalDate fechaFin = LocalDate.parse(fin);
+
+                String sql = "SELECT SUM(total) AS total_ingresos FROM venta WHERE fecha BETWEEN ? AND ?";
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setTimestamp(1, Timestamp.valueOf(fechaInicio.atStartOfDay()));
+                    stmt.setTimestamp(2, Timestamp.valueOf(fechaFin.plusDays(1).atStartOfDay()));
+
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        tableModel.addColumn("Total Ingresos");
+                        if (rs.next()) {
+                            tableModel.addRow(new Object[]{rs.getDouble("total_ingresos")});
+                        }
+                    }
+                }
             }
         }
-    } else if ("Estadísticas".equals(seleccion)) {
-        if ("Obtener Ventas por Fecha".equals(metodoSeleccionado)) {
-            String fechaStr = JOptionPane.showInputDialog("Ingrese la fecha (YYYY-MM-DD):");
-            LocalDate fecha = LocalDate.parse(fechaStr);
-            List<Venta> ventas = reporteService.obtenerVentasPorFecha(fecha);
+     } catch (SQLException e) {
+        JOptionPane.showMessageDialog(this, "Error al obtener estadísticas: " + e.getMessage());
+     } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage());
+     }
 
-            tableModel.addColumn("ID");
-            tableModel.addColumn("Fecha");
-            tableModel.addColumn("Total");
-
-            for (Venta v : ventas) {
-                tableModel.addRow(new Object[]{v.getId(), v.getFecha(), v.getTotal()});
-            }
-        } else if ("Obtener Productos Más Vendidos".equals(metodoSeleccionado)) {
-            List<Object[]> productos = reporteService.obtenerProductosMasVendidos();
-            tableModel.addColumn("Producto");
-            tableModel.addColumn("Cantidad Vendida");
-
-            for (Object[] p : productos) {
-                tableModel.addRow(new Object[]{p[0], p[1]});
-            }
-        } else if ("Obtener Ingresos por Período".equals(metodoSeleccionado)) {
-            String inicio = JOptionPane.showInputDialog("Ingrese la fecha de inicio (YYYY-MM-DD):");
-            String fin = JOptionPane.showInputDialog("Ingrese la fecha de fin (YYYY-MM-DD):");
-
-            LocalDate fechaInicio = LocalDate.parse(inicio);
-            LocalDate fechaFin = LocalDate.parse(fin);
-            Double ingresos = reporteService.obtenerIngresosPorPeriodo(fechaInicio, fechaFin);
-            tableModel.addColumn("Total Ingresos");
-            tableModel.addRow(new Object[]{ingresos});
-        }
-          
-    }
-    
-    tableModel.fireTableDataChanged();
-    
+     tableModel.fireTableDataChanged(); 
+        
     }//GEN-LAST:event_metodosComboActionPerformed
+
+    private void btnMenuPrincipalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMenuPrincipalActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+    
+        // Open the MainPOSWindow
+        MainPOSWindow mainWindow = new MainPOSWindow();
+        mainWindow.setVisible(true);  // Show the MainPOSWindow
+    }//GEN-LAST:event_btnMenuPrincipalActionPerformed
 
     /**
      * @param args the command line arguments
@@ -267,6 +389,7 @@ public class Estadisticas extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnMenuPrincipal;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;

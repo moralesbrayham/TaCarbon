@@ -14,11 +14,13 @@ public class Venta {
     
     private Long id;
     
-    private int numeroMesa;
+    private Integer numeroMesa;
 
     private LocalDateTime fecha;
 
     private Double total;
+    
+    private String estado;  // Por ejemplo: "En espera", "En preparación", "Orden lista"
     
     
 
@@ -30,7 +32,7 @@ public class Venta {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public int getNumeroMesa() {return numeroMesa;}
+    public Integer getNumeroMesa() {return numeroMesa;}
     public void setNumeroMesa(int numeroMesa) { this.numeroMesa = numeroMesa;}
 
     public LocalDateTime getFecha() { return fecha; }
@@ -40,10 +42,10 @@ public class Venta {
     public void setTotal(Double total) { this.total = total; }
 
     public List<DetalleVenta> getDetalles() { return detalles; }
-    public void setDetalles(List<DetalleVenta> detalles) { this.detalles = detalles; 
+    public void setDetalles(List<DetalleVenta> detalles) { this.detalles = detalles; }
     
-        
-    }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
     
 }
 

@@ -2,12 +2,14 @@ package org.example.controller;
 
 import org.example.model.Venta;
 import org.example.service.VentaService;
+import org.example.dto.VentaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -28,6 +30,18 @@ public class VentaController {
     public ResponseEntity<Venta> obtenerVentaPorId(@PathVariable Long id) {
         Optional<Venta> venta = ventaService.obtenerVentaPorId(id);
         return venta.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping("/pendientes")
+    public List<VentaDTO> obtenerPendientes() {
+        return ventaService.obtenerOrdenesPendientes();
+    }
+    
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<?> cambiarEstado(@PathVariable Long id, @RequestBody Map<String, String> payload) {
+        String nuevoEstado = payload.get("estado");
+        ventaService.actualizarEstado(id, nuevoEstado);
+        return ResponseEntity.ok().build();
     }
 
     // Registrar una nueva venta
@@ -50,5 +64,6 @@ public class VentaController {
         ventaService.eliminarVenta(id);
         return ResponseEntity.noContent().build();
     }
+    
+    
 }
-

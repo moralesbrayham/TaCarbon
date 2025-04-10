@@ -4,11 +4,15 @@
  */
 package org.example;
 
+import org.example.service.UsuarioService;
+
 /**
  *
  * @author moral
  */
 public class MainPOSWindow extends javax.swing.JFrame {
+        private UsuarioService usuarioService; //Declare the service
+
 
     /**
      * Creates new form MainPOSWindow
@@ -34,12 +38,12 @@ public class MainPOSWindow extends javax.swing.JFrame {
         btnRegistrarVenta = new javax.swing.JButton();
         btnInventario = new javax.swing.JButton();
         btnPantallaCocina = new javax.swing.JButton();
-        btnEstadisticas = new javax.swing.JButton();
         btnUsuarios = new javax.swing.JButton();
+        btnEstadisticas = new javax.swing.JButton();
         btnCerrarSesion = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Punto de Venta TaCarbon");
+        setTitle("Punto de Venta TaCarbon - Menu Principal");
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 3));
@@ -60,6 +64,11 @@ public class MainPOSWindow extends javax.swing.JFrame {
         btnInventario.setFont(new java.awt.Font("Yu Gothic Medium", 1, 24)); // NOI18N
         btnInventario.setText("Productos");
         btnInventario.setBorder(new javax.swing.border.MatteBorder(null));
+        btnInventario.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInventarioActionPerformed(evt);
+            }
+        });
         jPanel1.add(btnInventario);
 
         btnPantallaCocina.setBackground(new java.awt.Color(205, 205, 205));
@@ -73,6 +82,17 @@ public class MainPOSWindow extends javax.swing.JFrame {
         });
         jPanel1.add(btnPantallaCocina);
 
+        btnUsuarios.setBackground(new java.awt.Color(205, 205, 205));
+        btnUsuarios.setFont(new java.awt.Font("Yu Gothic Medium", 1, 24)); // NOI18N
+        btnUsuarios.setText("Administrar Usuarios");
+        btnUsuarios.setBorder(new javax.swing.border.MatteBorder(null));
+        btnUsuarios.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUsuariosActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnUsuarios);
+
         btnEstadisticas.setBackground(new java.awt.Color(205, 205, 205));
         btnEstadisticas.setFont(new java.awt.Font("Yu Gothic Medium", 1, 24)); // NOI18N
         btnEstadisticas.setText("Estadisticas");
@@ -84,12 +104,6 @@ public class MainPOSWindow extends javax.swing.JFrame {
             }
         });
         jPanel1.add(btnEstadisticas);
-
-        btnUsuarios.setBackground(new java.awt.Color(205, 205, 205));
-        btnUsuarios.setFont(new java.awt.Font("Yu Gothic Medium", 1, 24)); // NOI18N
-        btnUsuarios.setText("Administrar Usuarios");
-        btnUsuarios.setBorder(new javax.swing.border.MatteBorder(null));
-        jPanel1.add(btnUsuarios);
 
         btnCerrarSesion.setBackground(new java.awt.Color(155, 155, 155));
         btnCerrarSesion.setFont(new java.awt.Font("Yu Gothic Medium", 3, 24)); // NOI18N
@@ -118,26 +132,41 @@ public class MainPOSWindow extends javax.swing.JFrame {
 
     private void btnPantallaCocinaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPantallaCocinaActionPerformed
         // TODO add your handling code here:
-            new PantallaCocina().setVisible(true);
+        dispose();
+        new PantallaCocina().setVisible(true);
         
     }//GEN-LAST:event_btnPantallaCocinaActionPerformed
 
     private void btnEstadisticasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEstadisticasActionPerformed
         // TODO add your handling code here:
+        dispose();
         new Estadisticas().setVisible(true);
     }//GEN-LAST:event_btnEstadisticasActionPerformed
 
     private void btnCerrarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarSesionActionPerformed
         // TODO add your handling code here:
-            dispose(); // Cierra la ventana actual
-    new LoginForm().setVisible(true); // Vuelve al login
+        dispose(); // Cierra la ventana actual
+        new LoginForm().setVisible(true); // Vuelve al login
     }//GEN-LAST:event_btnCerrarSesionActionPerformed
 
     private void btnRegistrarVentaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrarVentaActionPerformed
         // TODO add your handling code here:
-            RegistroVentaForm ventaForm = new RegistroVentaForm();
-    ventaForm.setVisible(true);
+        dispose();
+        RegistroVentaForm ventaForm = new RegistroVentaForm();
+        ventaForm.setVisible(true);
     }//GEN-LAST:event_btnRegistrarVentaActionPerformed
+
+    private void btnInventarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInventarioActionPerformed
+        // TODO add your handling code here:
+        dispose();
+        new RegistroProductosForm().setVisible(true);
+    }//GEN-LAST:event_btnInventarioActionPerformed
+
+    private void btnUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUsuariosActionPerformed
+        // TODO add your handling code here:
+        dispose();
+        new RegistroUsuarioForm().setVisible(true);
+    }//GEN-LAST:event_btnUsuariosActionPerformed
 
     /**
      * @param args the command line arguments
