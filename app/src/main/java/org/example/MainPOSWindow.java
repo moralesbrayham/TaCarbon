@@ -3,6 +3,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package org.example;
+import javax.swing.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.example.service.UsuarioService;
 
@@ -11,19 +15,50 @@ import org.example.service.UsuarioService;
  * @author moral
  */
 public class MainPOSWindow extends javax.swing.JFrame {
-        private UsuarioService usuarioService; //Declare the service
-
+    private UsuarioService usuarioService; //Declare the service
+    // Lista estática para rastrear todas las instancias abiertas
+    private static final List<MainPOSWindow> instances = new ArrayList<>();
 
     /**
      * Creates new form MainPOSWindow
      */
     public MainPOSWindow() {
+        instances.add(this); // Agrega la nueva instancia a la lista
         initComponents();
         setLocationRelativeTo(null); // Centrar la ventana en la pantalla
         
-      
-    }
+        // Agregamos listener personalizado
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (instances.size() > 1) {
+                    // Si hay más de una instancia, solo la cierra
+                    dispose();
+                } else {
+                    // Si es la única ventana abierta, pedir confirmación para salir
+                    int confirm = JOptionPane.showConfirmDialog(
+                            MainPOSWindow.this,
+                            "Si cierras esta ventana se cerrará el programa. ¿Estás seguro que deseas continuar?",
+                            "Confirmar salida",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE
+                    );
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        System.exit(0); // Cierra toda la app
+                    }
+                    // Si elige "No", no hace nada (ventana sigue abierta)
+                }
+            }
 
+            @Override
+            public void windowClosed(WindowEvent e) {
+                // Quita la instancia cerrada de la lista
+                instances.remove(MainPOSWindow.this);
+            }
+        });
+
+        setVisible(true); // Mostrar ventana
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -42,7 +77,7 @@ public class MainPOSWindow extends javax.swing.JFrame {
         btnEstadisticas = new javax.swing.JButton();
         btnCerrarSesion = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Punto de Venta TaCarbon - Menu Principal");
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
@@ -132,39 +167,55 @@ public class MainPOSWindow extends javax.swing.JFrame {
 
     private void btnPantallaCocinaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPantallaCocinaActionPerformed
         // TODO add your handling code here:
-        dispose();
+        
         new PantallaCocina().setVisible(true);
         
     }//GEN-LAST:event_btnPantallaCocinaActionPerformed
 
     private void btnEstadisticasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEstadisticasActionPerformed
         // TODO add your handling code here:
-        dispose();
+        
         new Estadisticas().setVisible(true);
     }//GEN-LAST:event_btnEstadisticasActionPerformed
 
     private void btnCerrarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarSesionActionPerformed
         // TODO add your handling code here:
-        dispose(); // Cierra la ventana actual
-        new LoginForm().setVisible(true); // Vuelve al login
+        // Confirmar antes de cerrar sesión
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "¿Estás seguro que deseas cerrar sesión?",
+                "Cerrar sesión",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Cerrar todas las instancias de MainPOSWindow
+            for (MainPOSWindow ventana : new ArrayList<>(MainPOSWindow.instances)) {
+                ventana.dispose();
+            }
+
+            // Mostrar login
+            new LoginForm().setVisible(true);
+        }
     }//GEN-LAST:event_btnCerrarSesionActionPerformed
 
     private void btnRegistrarVentaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrarVentaActionPerformed
         // TODO add your handling code here:
-        dispose();
+        
         RegistroVentaForm ventaForm = new RegistroVentaForm();
         ventaForm.setVisible(true);
     }//GEN-LAST:event_btnRegistrarVentaActionPerformed
 
     private void btnInventarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInventarioActionPerformed
         // TODO add your handling code here:
-        dispose();
+        
         new RegistroProductosForm().setVisible(true);
     }//GEN-LAST:event_btnInventarioActionPerformed
 
     private void btnUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUsuariosActionPerformed
         // TODO add your handling code here:
-        dispose();
+        
         new RegistroUsuarioForm().setVisible(true);
     }//GEN-LAST:event_btnUsuariosActionPerformed
 

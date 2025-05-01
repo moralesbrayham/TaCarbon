@@ -5,16 +5,23 @@
 package org.example.dto;
 
 public class ItemDTO {
+
     private String nombreProducto;
     private int cantidad;
+    private int suborden; 
 
     // Constructor
-    public ItemDTO(String nombreProducto, int cantidad) {
+    public ItemDTO(String nombreProducto, int cantidad, int suborden) {
         this.nombreProducto = nombreProducto;
         this.cantidad = cantidad;
+        this.suborden = suborden;
+    }
+
+    public ItemDTO() {
     }
 
     // Getters y Setters
+    
     public String getNombreProducto() {
         return nombreProducto;
     }
@@ -29,5 +36,13 @@ public class ItemDTO {
 
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
+    }
+    
+    public int getSuborden() {
+        return suborden;
+    }
+
+    public void setSuborden(int suborden) {
+        this.suborden = suborden;
     }
 }

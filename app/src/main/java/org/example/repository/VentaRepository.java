@@ -22,5 +22,6 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
     @Query("SELECT SUM(v.total) FROM Venta v WHERE v.fecha BETWEEN :inicio AND :fin")
     Double obtenerTotalIngresos(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
     
-    List<Venta> findByEstado(String estado);
+    List<Venta> findByEstadoIn(List<String> estados);
+
 }

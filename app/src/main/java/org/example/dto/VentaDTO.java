@@ -12,6 +12,8 @@ public class VentaDTO {
     private int numeroMesa;
     private String estado;
     private List<ItemDTO> productos;
+    
+    
 
     // Constructor
     public VentaDTO(Long id, int numeroMesa, String estado, List<ItemDTO> productos) {
@@ -19,6 +21,12 @@ public class VentaDTO {
         this.numeroMesa = numeroMesa;
         this.estado = estado;
         this.productos = productos;
+    }
+    
+
+
+
+    public VentaDTO() {
     }
 
     // Getters y Setters

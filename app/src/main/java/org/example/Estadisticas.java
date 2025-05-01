@@ -67,7 +67,7 @@ public class Estadisticas extends javax.swing.JFrame {
         resultadosTable = new javax.swing.JTable();
         btnMenuPrincipal = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Punto de venta TaCarbon - Estadisticas y Reportes");
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
@@ -320,7 +320,7 @@ public class Estadisticas extends javax.swing.JFrame {
                 LocalDate fechaInicio = LocalDate.parse(inicio);
                 LocalDate fechaFin = LocalDate.parse(fin);
 
-                String sql = "SELECT SUM(total) AS total_ingresos FROM venta WHERE fecha BETWEEN ? AND ?";
+                String sql = "SELECT SUM(total) AS total_ingresos FROM venta WHERE fecha BETWEEN ? AND ? AND estado != 'Eliminada'";
                 try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                     stmt.setTimestamp(1, Timestamp.valueOf(fechaInicio.atStartOfDay()));
                     stmt.setTimestamp(2, Timestamp.valueOf(fechaFin.plusDays(1).atStartOfDay()));

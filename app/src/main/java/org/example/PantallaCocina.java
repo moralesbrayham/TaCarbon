@@ -20,7 +20,14 @@ import java.io.BufferedReader;
 // JSON (Gson)
 import com.google.gson.Gson;
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Comparator;
 
 // Listas y estructuras
 import java.util.List;
@@ -78,39 +85,110 @@ public class PantallaCocina extends javax.swing.JFrame {
         }
     }
     
-    private void actualizarPanelOrdenes(String jsonResponse) {
-        panelOrdenes.removeAll();
-        Gson gson = new Gson();
-        List<Map<String, Object>> ordenes = gson.fromJson(jsonResponse, List.class);
+private void actualizarPanelOrdenes(String jsonResponse) {
+    panelOrdenes.removeAll();
+    Gson gson = new Gson();
+    List<Map<String, Object>> ordenes = gson.fromJson(jsonResponse, List.class);
 
-        for (Map<String, Object> orden : ordenes) {
-            int id = ((Double) orden.get("id")).intValue();
-            int mesa = ((Double) orden.get("numeroMesa")).intValue();
-            String estado = (String) orden.get("estado");
+    // Ordenar por ID (de menor a mayor, más antiguas primero)
+    ordenes.sort(Comparator.comparing(o -> ((Double) o.get("id"))));
 
-            JPanel card = new JPanel(new BorderLayout());
-            card.setBorder(BorderFactory.createTitledBorder("Orden #" + id + " - Mesa " + mesa));
+    // Tomar las últimas 8 órdenes (las más recientes al final)
+    // Filtrar solo las órdenes activas (en espera o en preparación)
+    List<Map<String, Object>> ordenesActivas = ordenes.stream()
+        .filter(o -> {
+            String estado = (String) o.get("estado");
+            return estado.equals("En espera") || estado.equals("En preparación");
+        })
+        .limit(8) // Solo las primeras 8 activas
+        .collect(Collectors.toList());
 
-            JTextArea areaDetalles = new JTextArea("Detalles aquí...");
-            areaDetalles.setEditable(false);
+    ordenes = ordenesActivas;
 
-            JButton btnEstado = new JButton(estado);
-            btnEstado.addActionListener(e -> cambiarEstado(id, btnEstado));
 
-            card.add(areaDetalles, BorderLayout.CENTER);
-            card.add(btnEstado, BorderLayout.SOUTH);
+    // Invertir para que la más nueva esté arriba a la izquierda y la más vieja abajo a la derecha
+    Collections.reverse(ordenes);
 
-            panelOrdenes.add(card);
+    panelOrdenes.setLayout(new GridLayout(2, 4, 10, 10)); // 2 filas, 4 columnas, con espacios
+
+    for (Map<String, Object> orden : ordenes) {
+        int id = ((Double) orden.get("id")).intValue();
+        int mesa = ((Double) orden.get("numeroMesa")).intValue();
+        String estado = (String) orden.get("estado");
+
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBorder(BorderFactory.createTitledBorder("Orden #" + id + " - Mesa " + mesa));
+
+        // Procesar productos
+        List<Map<String, Object>> productos = (List<Map<String, Object>>) orden.get("productos");
+        StringBuilder detalles = new StringBuilder();
+
+        for (Map<String, Object> producto : productos) {
+            String nombre = producto.get("nombreProducto") != null ? producto.get("nombreProducto").toString() : "Desconocido";
+            int cantidad = 0;
+            if (producto.get("cantidad") instanceof Number) {
+                cantidad = ((Number) producto.get("cantidad")).intValue();
+                
+            }
+
+
+            Object subordenObj = producto.get("suborden");
+            String suborden = "N/A";
+            if (subordenObj instanceof Number) {
+            suborden = String.valueOf(((Number) subordenObj).intValue());
+            }
+
+            detalles.append("Plato ").append(suborden).append(": ")
+            .append(nombre).append(" x").append(cantidad).append("\n");
+
+
         }
 
-        panelOrdenes.revalidate();
-        panelOrdenes.repaint();
+
+        JTextArea areaDetalles = new JTextArea(detalles.toString());
+        areaDetalles.setFont(new Font("Arial", Font.PLAIN, 18));
+        areaDetalles.setEditable(false);
+
+        JButton btnEstado = new JButton(estado);
+        btnEstado.setPreferredSize(new Dimension(150, 30));
+        btnEstado.addActionListener(e -> cambiarEstado(id, btnEstado));
+
+        // Estilo de botón
+        btnEstado.setFont(new Font("Arial", Font.BOLD, 16));
+        btnEstado.setForeground(Color.WHITE);
+        switch (estado) {
+            case "En espera":
+                btnEstado.setBackground(Color.ORANGE);
+                break;
+            case "En preparación":
+                btnEstado.setBackground(Color.BLUE);
+                break;
+            case "Orden lista":
+                btnEstado.setBackground(Color.GREEN.darker());
+                break;
+            default:
+                btnEstado.setBackground(Color.GRAY);
+        }
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        bottomPanel.add(btnEstado);
+
+        card.add(areaDetalles, BorderLayout.CENTER);
+        card.add(bottomPanel, BorderLayout.SOUTH);
+
+        panelOrdenes.add(card);
     }
+
+    panelOrdenes.revalidate();
+    panelOrdenes.repaint();
+}
+
     
     private void cambiarEstado(int idOrden, JButton boton) {
         String estadoActual = boton.getText();
         String nuevoEstado;
 
+        // Lógica para decidir el siguiente estado
         switch (estadoActual) {
             case "En espera":
                 nuevoEstado = "En preparación";
@@ -119,10 +197,11 @@ public class PantallaCocina extends javax.swing.JFrame {
                 nuevoEstado = "Orden lista";
                 break;
             case "Orden lista":
+                // Ya está lista, no hacer nada o volver a "En espera" si quieres ciclo
                 return;
             default:
-                return;
-        }
+                nuevoEstado = "En espera";
+    }
 
         try {
             URL url = new URL("http://localhost:8080/api/ventas/" + idOrden + "/estado");
@@ -139,8 +218,24 @@ public class PantallaCocina extends javax.swing.JFrame {
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 boton.setText(nuevoEstado);
-                if (nuevoEstado.equals("Orden lista")) {
-                    JOptionPane.showMessageDialog(this, "¡Orden #" + idOrden + " está lista!");
+
+                // Estilo del botón actualizado
+                boton.setFont(new Font("Arial", Font.BOLD, 16));
+                boton.setForeground(Color.WHITE);
+
+                switch (nuevoEstado) {
+                    case "En espera":
+                        boton.setBackground(Color.ORANGE);
+                        break;
+                    case "En preparación":
+                        boton.setBackground(Color.BLUE);
+                        break;
+                    case "Orden lista":
+                        boton.setBackground(Color.GREEN.darker());
+                        JOptionPane.showMessageDialog(this, "¡Orden #" + idOrden + " está lista!");
+                        break;
+                    default:
+                        boton.setBackground(Color.GRAY);
                 }
             }
 
@@ -149,6 +244,9 @@ public class PantallaCocina extends javax.swing.JFrame {
             System.out.println("Error al cambiar estado: " + e.getMessage());
         }
     }
+
+
+
 
 
 
@@ -166,8 +264,8 @@ public class PantallaCocina extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         panelOrdenes = new javax.swing.JPanel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Punto de Venta TaCarbon");
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Punto de Venta TaCarbon - Pantalla de cocina");
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setPreferredSize(new java.awt.Dimension(800, 600));
@@ -181,6 +279,8 @@ public class PantallaCocina extends javax.swing.JFrame {
                 btnMenuPrincipalActionPerformed(evt);
             }
         });
+
+        panelOrdenes.setFont(new java.awt.Font("Bodoni MT", 0, 18)); // NOI18N
 
         javax.swing.GroupLayout panelOrdenesLayout = new javax.swing.GroupLayout(panelOrdenes);
         panelOrdenes.setLayout(panelOrdenesLayout);
@@ -200,7 +300,7 @@ public class PantallaCocina extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGap(0, 650, Short.MAX_VALUE)
+                .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(btnMenuPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addComponent(jScrollPane1)
         );
@@ -209,7 +309,7 @@ public class PantallaCocina extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(btnMenuPrincipal, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 544, Short.MAX_VALUE))
+                .addComponent(jScrollPane1))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -230,7 +330,6 @@ public class PantallaCocina extends javax.swing.JFrame {
     
     private void btnMenuPrincipalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMenuPrincipalActionPerformed
         // TODO add your handling code here:
-        this.dispose();
     
         // Open the MainPOSWindow
         MainPOSWindow mainWindow = new MainPOSWindow();

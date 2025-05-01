@@ -25,6 +25,8 @@ public class DetalleVenta {
     private Double precio;
 
     private Double subtotal;
+    
+    private Integer suborden;
 
     // Getters y Setters
     public Long getId() { return id; }
@@ -44,5 +46,9 @@ public class DetalleVenta {
 
     public Double getSubtotal() { return subtotal; }
     public void setSubtotal(Double subtotal) { this.subtotal = subtotal; }
+
+    public Integer getSuborden() { return suborden; }
+    public void setSuborden(Integer Suborden) { this.suborden = Suborden; }
+    
 }
 

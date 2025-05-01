@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.example.repository.DetalleVentaRepository;
 
 @Service
 public class VentaService {
@@ -81,22 +80,49 @@ public class VentaService {
 
     }
 
-    // Eliminar una venta
+    @Transactional
     public void eliminarVenta(Long id) {
-        if (ventaRepository.existsById(id)) {
-            ventaRepository.deleteById(id);
+     Venta venta = ventaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id));
+
+        // Restaurar stock por cada producto vendido
+        for (DetalleVenta detalle : venta.getDetalles()) {
+            Producto producto = detalle.getProducto();
+            producto.setStock(producto.getStock() + detalle.getCantidad());
+            productoRepository.save(producto);
         }
+
+        // Cambiar estado a "Eliminada"
+        venta.setEstado("Eliminada");
+        ventaRepository.save(venta);
+
+        // Generar ticket de venta eliminada
+     TicketService ticketService = new TicketService();
+     String path = ticketService.generarTicketEliminadoPDF(venta);
+        System.out.println("Ticket de venta eliminada generado en: " + path);
     }
+
     
     public List<VentaDTO> obtenerOrdenesPendientes() {
-        List<Venta> ventas = ventaRepository.findByEstado("En espera"); // o el estado que definas
+        List<String> estadosPermitidos = List.of("En espera", "En preparación");
+        List<Venta> ventas = ventaRepository.findByEstadoIn(estadosPermitidos);
 
-        return ventas.stream().map(v -> {
-            List<ItemDTO> productos = v.getDetalles().stream()
-                .map(d -> new ItemDTO(d.getProducto().getNombre(), d.getCantidad()))
-                .collect(Collectors.toList());
+        return ventas.stream().map(venta -> {
+            VentaDTO dto = new VentaDTO();
+            dto.setId(venta.getId());
+            dto.setNumeroMesa(venta.getNumeroMesa());
+            dto.setEstado(venta.getEstado());
 
-            return new VentaDTO(v.getId(), v.getNumeroMesa(), v.getEstado(), productos);
+            List<ItemDTO> items = venta.getDetalles().stream().map(detalle -> {
+                ItemDTO item = new ItemDTO();
+                item.setNombreProducto(detalle.getProducto().getNombre());
+                item.setCantidad(detalle.getCantidad());
+                item.setSuborden(detalle.getSuborden() != null ? detalle.getSuborden() : 0);
+                return item;
+            }).collect(Collectors.toList());
+
+            dto.setProductos(items);
+            return dto;
         }).collect(Collectors.toList());
     }
 

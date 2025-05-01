@@ -119,8 +119,8 @@ private ProductoRepository productoRepository;
         jScrollPane1 = new javax.swing.JScrollPane();
         tblSubordenes = new javax.swing.JTable();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(820, 520));
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setResizable(false);
         setSize(new java.awt.Dimension(0, 0));
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
@@ -128,21 +128,23 @@ private ProductoRepository productoRepository;
         jPanel1.setMinimumSize(new java.awt.Dimension(800, 500));
         jPanel1.setPreferredSize(new java.awt.Dimension(820, 520));
 
-        btnFinalizarVenta.setBackground(new java.awt.Color(0, 209, 59));
+        btnFinalizarVenta.setBackground(new java.awt.Color(0, 204, 0));
         btnFinalizarVenta.setFont(new java.awt.Font("Yu Gothic UI Semibold", 1, 18)); // NOI18N
         btnFinalizarVenta.setText("Finalizar venta");
+        btnFinalizarVenta.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED, new java.awt.Color(51, 204, 0), new java.awt.Color(51, 153, 0), new java.awt.Color(102, 255, 102), new java.awt.Color(51, 255, 51)));
         btnFinalizarVenta.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnFinalizarVentaActionPerformed(evt);
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Yu Gothic Medium", 3, 30)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Bell MT", 3, 36)); // NOI18N
         jLabel1.setText("Registro de venta");
 
         btnCancelar.setBackground(new java.awt.Color(255, 0, 0));
         btnCancelar.setFont(new java.awt.Font("Yu Gothic UI Semibold", 1, 18)); // NOI18N
         btnCancelar.setText("Cancelar");
+        btnCancelar.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED, new java.awt.Color(255, 51, 51), new java.awt.Color(255, 0, 0), new java.awt.Color(255, 153, 153), new java.awt.Color(255, 102, 51)));
         btnCancelar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCancelarActionPerformed(evt);
@@ -155,18 +157,23 @@ private ProductoRepository productoRepository;
         lblTotal.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(33, 172, 25), new java.awt.Color(0, 204, 0), new java.awt.Color(0, 204, 51), new java.awt.Color(0, 204, 51)));
 
         jLabel3.setBackground(new java.awt.Color(242, 94, 68));
-        jLabel3.setFont(new java.awt.Font("Yu Gothic Light", 1, 14)); // NOI18N
+        jLabel3.setFont(new java.awt.Font("Bell MT", 1, 18)); // NOI18N
         jLabel3.setText("Numero de mesa:");
 
-        txtNumeroMesa.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 204, 153), 2));
+        txtNumeroMesa.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtNumeroMesa.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 102, 0), new java.awt.Color(255, 153, 0), new java.awt.Color(255, 0, 0), new java.awt.Color(255, 51, 0)));
 
+        btnEliminarSuborden.setBackground(new java.awt.Color(255, 51, 51));
+        btnEliminarSuborden.setFont(new java.awt.Font("Bell MT", 1, 14)); // NOI18N
         btnEliminarSuborden.setText("Eliminar");
+        btnEliminarSuborden.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED, new java.awt.Color(255, 51, 51), new java.awt.Color(255, 0, 0), new java.awt.Color(255, 204, 153), new java.awt.Color(255, 102, 102)));
         btnEliminarSuborden.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEliminarSubordenActionPerformed(evt);
             }
         });
 
+        cbxProductos.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         cbxProductos.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbxProductos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -175,31 +182,41 @@ private ProductoRepository productoRepository;
         });
 
         jLabel4.setBackground(new java.awt.Color(242, 94, 68));
-        jLabel4.setFont(new java.awt.Font("Yu Gothic Light", 1, 14)); // NOI18N
+        jLabel4.setFont(new java.awt.Font("Bell MT", 1, 18)); // NOI18N
         jLabel4.setText("Cantidad:");
 
-        txtCantidad.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 204, 153), 2));
+        txtCantidad.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtCantidad.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 102, 0), new java.awt.Color(255, 153, 0), new java.awt.Color(255, 0, 0), new java.awt.Color(255, 51, 0)));
         txtCantidad.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtCantidadActionPerformed(evt);
             }
         });
 
+        btnAgregarProducto.setBackground(new java.awt.Color(51, 204, 0));
+        btnAgregarProducto.setFont(new java.awt.Font("Bell MT", 1, 14)); // NOI18N
         btnAgregarProducto.setText("Agregar Producto");
+        btnAgregarProducto.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED, new java.awt.Color(0, 204, 0), new java.awt.Color(51, 204, 0), new java.awt.Color(51, 255, 51), new java.awt.Color(51, 255, 0)));
         btnAgregarProducto.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnAgregarProductoActionPerformed(evt);
             }
         });
 
+        btnNuevaSuborden.setBackground(new java.awt.Color(102, 102, 255));
+        btnNuevaSuborden.setFont(new java.awt.Font("Bell MT", 1, 14)); // NOI18N
         btnNuevaSuborden.setText("Nuevo Plato");
+        btnNuevaSuborden.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED, new java.awt.Color(102, 153, 255), new java.awt.Color(204, 204, 255), new java.awt.Color(51, 51, 255), new java.awt.Color(51, 153, 255)));
         btnNuevaSuborden.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnNuevaSubordenActionPerformed(evt);
             }
         });
 
+        btnListaSubordenes.setBackground(new java.awt.Color(156, 188, 232));
+        btnListaSubordenes.setFont(new java.awt.Font("Bell MT", 1, 14)); // NOI18N
         btnListaSubordenes.setText("Lista de platos");
+        btnListaSubordenes.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(102, 102, 255), new java.awt.Color(51, 51, 255), new java.awt.Color(204, 204, 255), new java.awt.Color(153, 153, 255)));
         btnListaSubordenes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnListaSubordenesActionPerformed(evt);
@@ -217,7 +234,10 @@ private ProductoRepository productoRepository;
             }
         });
 
+        btnTickets.setBackground(new java.awt.Color(255, 102, 0));
+        btnTickets.setFont(new java.awt.Font("Bell MT", 1, 14)); // NOI18N
         btnTickets.setText("Tickets");
+        btnTickets.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 204, 102), new java.awt.Color(255, 255, 153), new java.awt.Color(255, 102, 0), new java.awt.Color(255, 153, 51)));
         btnTickets.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnTicketsActionPerformed(evt);
@@ -240,6 +260,8 @@ private ProductoRepository productoRepository;
                 return canEdit [columnIndex];
             }
         });
+        tblSubordenes.setShowGrid(false);
+        tblSubordenes.setShowHorizontalLines(true);
         // ✅ Add a TableModelListener after initializing the table
         tblSubordenes.getModel().addTableModelListener(new TableModelListener() {
             @Override
@@ -273,28 +295,30 @@ private ProductoRepository productoRepository;
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(53, 53, 53)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(33, 33, 33)
+                                        .addGap(161, 161, 161)
                                         .addComponent(txtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(cbxProductos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 1, Short.MAX_VALUE))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                        .addGap(53, 53, 53)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(cbxProductos, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(32, 32, 32)
                                 .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addGap(39, 39, 39))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(21, 21, 21)
+                        .addGap(32, 32, 32)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnListaSubordenes, javax.swing.GroupLayout.DEFAULT_SIZE, 146, Short.MAX_VALUE)
-                            .addComponent(btnNuevaSuborden, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(btnNuevaSuborden, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnListaSubordenes, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnEliminarSuborden, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnTickets, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(12, 12, 12))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnEliminarSuborden, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
+                            .addComponent(btnTickets, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(24, 24, 24))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(42, 42, 42)
                         .addComponent(jLabel3)
@@ -315,9 +339,12 @@ private ProductoRepository productoRepository;
                         .addGap(52, 52, 52))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnFinalizarVenta))
-                        .addGap(39, 39, 39)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(39, 39, 39))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(btnFinalizarVenta, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)))
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -356,13 +383,13 @@ private ProductoRepository productoRepository;
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnAgregarProducto, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(28, 28, 28)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnNuevaSuborden, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnEliminarSuborden, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnNuevaSuborden)
-                            .addComponent(btnEliminarSuborden))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnListaSubordenes, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnTickets))))
+                            .addComponent(btnListaSubordenes, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnTickets, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(56, Short.MAX_VALUE))
         );
 
@@ -370,7 +397,7 @@ private ProductoRepository productoRepository;
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -565,6 +592,7 @@ private void actualizarSubtotal(int fila) {
         for (int i = 0; i < model.getRowCount(); i++) {
             Map<String, Object> detalle = new HashMap<>();
             detalle.put("producto", Map.of("id", Integer.valueOf(model.getValueAt(i, 0).toString()))); // Product ID
+            detalle.put("suborden", Integer.valueOf(model.getValueAt(i, 1).toString())); // suborden (# de plato)
             detalle.put("cantidad", Integer.valueOf(model.getValueAt(i, 3).toString()));  // Quantity
             detalle.put("precio", Double.valueOf(model.getValueAt(i, 4).toString()));  // Price (added this line)
             detallesVenta.add(detalle);
@@ -602,6 +630,9 @@ private void actualizarSubtotal(int fila) {
 
             // Clear UI after successful sale
             model.setRowCount(0);
+            subordenes.clear();
+            subordenes.add(1);
+            currentSuborden = 1;
             txtNumeroMesa.setText("");
             txtCantidad.setText("");
             lblTotal.setText("$0.00"); // This will be recalculated by the backend
@@ -640,6 +671,9 @@ private void actualizarSubtotal(int fila) {
         // Clear the table (tblSubordenes)
         DefaultTableModel model = (DefaultTableModel) tblSubordenes.getModel();
         model.setRowCount(0);  // Remove all rows from the table
+        subordenes.clear();
+        subordenes.add(1);
+        currentSuborden = 1;
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     private void btnMenuprincipalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMenuprincipalActionPerformed
