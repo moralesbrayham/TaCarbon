@@ -27,6 +27,11 @@ public class UsuarioService {
     public Optional<Usuario> obtenerUsuarioPorId(Long id) {
         return usuarioRepository.findById(id);
     }
+    
+    // Obtener usuario por correo    
+    public Optional<Usuario> obtenerPorCorreo(String correo) {
+    return usuarioRepository.findByCorreo(correo);
+    }
 
     // Registrar un nuevo usuario
     public Usuario registrarUsuario(Usuario usuario) {
@@ -39,6 +44,7 @@ public class UsuarioService {
         Optional<Usuario> usuario = usuarioRepository.findByCorreo(correo);
         return usuario.isPresent() && passwordEncoder.matches(contraseña, usuario.get().getContraseña());
     }
+   
 
     // Eliminar usuario por ID
     public void eliminarUsuario(Long id) {

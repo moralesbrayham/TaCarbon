@@ -41,9 +41,10 @@ public class RegistroVentaForm extends javax.swing.JFrame {
     private VentaService ventaService; // Declare the service
 
      @Autowired
-private ProductoRepository productoRepository;
+    private ProductoRepository productoRepository;
      
-     
+    private MainPOSWindow mainWindow;
+    
 
     public RegistroVentaForm() {
         
@@ -120,6 +121,7 @@ private ProductoRepository productoRepository;
         tblSubordenes = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Punto de venta TaCarbon - Registro de venta");
         setResizable(false);
         setSize(new java.awt.Dimension(0, 0));
 
@@ -462,6 +464,9 @@ private ProductoRepository productoRepository;
     }
         // (Opcional) Si tienes un total, actualizarlo
         actualizarTotal();
+        
+        //Borrar numero de cuadro de cantidad despues de agregar el producto
+        txtCantidad.setText("");
     }//GEN-LAST:event_btnAgregarProductoActionPerformed
 
     private void btnNuevaSubordenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevaSubordenActionPerformed
@@ -678,12 +683,18 @@ private void actualizarSubtotal(int fila) {
 
     private void btnMenuprincipalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMenuprincipalActionPerformed
         // TODO add your handling code here:
-        // Dispose of the current form (RegistroProductoForm)
-        this.dispose();
     
-        // Open the MainPOSWindow
-        MainPOSWindow mainWindow = new MainPOSWindow();
-        mainWindow.setVisible(true);  // Show the MainPOSWindow
+        if (mainWindow == null) {
+        mainWindow = new MainPOSWindow();
+        }
+
+        if (!mainWindow.isVisible()) {
+        mainWindow.setVisible(true);
+        }
+
+        // Traerla al frente
+        mainWindow.toFront();
+        mainWindow.requestFocus();
     }//GEN-LAST:event_btnMenuprincipalActionPerformed
 
     private void btnTicketsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTicketsActionPerformed
