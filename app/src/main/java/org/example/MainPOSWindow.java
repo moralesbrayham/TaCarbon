@@ -75,14 +75,15 @@ public class MainPOSWindow extends javax.swing.JFrame {
         btnPantallaCocina = new javax.swing.JButton();
         btnUsuarios = new javax.swing.JButton();
         btnEstadisticas = new javax.swing.JButton();
+        btnConfiguracionDeServidor = new javax.swing.JButton();
         btnCerrarSesion = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Punto de Venta TaCarbon - Menu Principal");
 
-        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 3));
-        jPanel1.setLayout(new java.awt.GridLayout(2, 2));
+        jPanel1.setBackground(new java.awt.Color(204, 204, 204));
+        jPanel1.setBorder(new javax.swing.border.MatteBorder(null));
+        jPanel1.setLayout(new java.awt.GridLayout(2, 3));
 
         btnRegistrarVenta.setBackground(new java.awt.Color(205, 205, 205));
         btnRegistrarVenta.setFont(new java.awt.Font("Yu Gothic Medium", 1, 24)); // NOI18N
@@ -119,7 +120,7 @@ public class MainPOSWindow extends javax.swing.JFrame {
 
         btnUsuarios.setBackground(new java.awt.Color(205, 205, 205));
         btnUsuarios.setFont(new java.awt.Font("Yu Gothic Medium", 1, 24)); // NOI18N
-        btnUsuarios.setText("Administrar Usuarios");
+        btnUsuarios.setText("<html><center>Administrar<br>Usuarios</center></html>");
         btnUsuarios.setBorder(new javax.swing.border.MatteBorder(null));
         btnUsuarios.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -140,6 +141,17 @@ public class MainPOSWindow extends javax.swing.JFrame {
         });
         jPanel1.add(btnEstadisticas);
 
+        btnConfiguracionDeServidor.setBackground(new java.awt.Color(204, 204, 204));
+        btnConfiguracionDeServidor.setFont(new java.awt.Font("Yu Gothic Medium", 1, 24)); // NOI18N
+        btnConfiguracionDeServidor.setText("<html><center>Configuración<br>del Servidor</center></html>");
+        btnConfiguracionDeServidor.setBorder(new javax.swing.border.MatteBorder(null));
+        btnConfiguracionDeServidor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnConfiguracionDeServidorActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnConfiguracionDeServidor);
+
         btnCerrarSesion.setBackground(new java.awt.Color(155, 155, 155));
         btnCerrarSesion.setFont(new java.awt.Font("Yu Gothic Medium", 3, 24)); // NOI18N
         btnCerrarSesion.setText("Cerrar Sesión");
@@ -155,7 +167,7 @@ public class MainPOSWindow extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1000, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -219,6 +231,10 @@ public class MainPOSWindow extends javax.swing.JFrame {
         new RegistroUsuarioForm().setVisible(true);
     }//GEN-LAST:event_btnUsuariosActionPerformed
 
+    private void btnConfiguracionDeServidorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfiguracionDeServidorActionPerformed
+        new ConfiguracionIPForm().setVisible(true);
+    }//GEN-LAST:event_btnConfiguracionDeServidorActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -256,6 +272,7 @@ public class MainPOSWindow extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCerrarSesion;
+    private javax.swing.JButton btnConfiguracionDeServidor;
     private javax.swing.JButton btnEstadisticas;
     private javax.swing.JButton btnInventario;
     private javax.swing.JButton btnPantallaCocina;

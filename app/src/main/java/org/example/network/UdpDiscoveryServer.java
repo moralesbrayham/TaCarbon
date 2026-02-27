@@ -5,6 +5,7 @@ import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
 
 import java.net.*;
+import org.example.pos.ConfiguracionIP;
 
 @Component
 public class UdpDiscoveryServer {
@@ -20,6 +21,7 @@ public class UdpDiscoveryServer {
     public void start() {
 
         serverThread = new Thread(() -> {
+
             try (DatagramSocket socket =
                          new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName("0.0.0.0"))) {
 
@@ -30,15 +32,27 @@ public class UdpDiscoveryServer {
 
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     socket.receive(packet);
-                    System.out.println("Solicitud recibida desde: " + packet.getAddress().getHostAddress());
+
+                    System.out.println("Solicitud recibida desde: "
+                            + packet.getAddress().getHostAddress());
+
                     String message = new String(packet.getData(), 0, packet.getLength());
 
                     if (DISCOVERY_REQUEST.equals(message)) {
 
-                        String serverIp = getLocalIp();
-                        System.out.println("IP detectada: " + serverIp);
+                        // 🔥 AQUÍ decidimos qué IP usar
+                        String manualIp = ConfiguracionIP.loadIp();
+                        String ipAUsar;
 
-                        String response = DISCOVERY_RESPONSE + ":" + serverIp + ":8080";
+                        if (manualIp != null && !manualIp.isEmpty()) {
+                            ipAUsar = manualIp;
+                            System.out.println("Usando IP manual: " + ipAUsar);
+                        } else {
+                            ipAUsar = getLocalIp();
+                            System.out.println("Usando IP automática: " + ipAUsar);
+                        }
+
+                        String response = DISCOVERY_RESPONSE + ":" + ipAUsar + ":8080";
 
                         DatagramPacket responsePacket = new DatagramPacket(
                                 response.getBytes(),
@@ -60,19 +74,13 @@ public class UdpDiscoveryServer {
         System.out.println("UDP Discovery Server iniciado.");
     }
 
-    // 🔥 ESTE MÉTODO VA FUERA
-/*
+    // Método automático REAL
     private String getLocalIp() throws Exception {
-
-    try (final DatagramSocket socket = new DatagramSocket()) {
-        socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-        return socket.getLocalAddress().getHostAddress();
+        try (final DatagramSocket socket = new DatagramSocket()) {
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            return socket.getLocalAddress().getHostAddress();
+        }
     }
-}
-*/
-    private String getLocalIp() {
-    return "192.168.1.138";
-}
 
     @PreDestroy
     public void stop() {
