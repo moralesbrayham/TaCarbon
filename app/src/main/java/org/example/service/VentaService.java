@@ -1,17 +1,21 @@
 package org.example.service;
 
-import org.example.model.Venta;
+import org.example.model.EstadoVenta;
 import org.example.model.DetalleVenta;
 import org.example.model.Producto;
-import org.example.repository.VentaRepository;
+import org.example.model.Usuario;
+import org.example.model.Venta;
+
 import org.example.repository.ProductoRepository;
+import org.example.repository.UsuarioRepository;
+import org.example.repository.VentaRepository;
+
 import org.example.dto.VentaDTO;
 import org.example.dto.ItemDTO;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +31,9 @@ public class VentaService {
     @Autowired
     private ProductoRepository productoRepository;
     
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    
     // Obtener todas las ventas
     public List<Venta> obtenerTodasLasVentas() {
         return ventaRepository.findAll();
@@ -36,12 +43,45 @@ public class VentaService {
     public Optional<Venta> obtenerVentaPorId(Long id) {
         return ventaRepository.findById(id);
     }
+    
+    //Crear venta que quedara en cuenta abierta
+    public Venta crearVentaAbierta(Long usuarioId, Integer numeroMesa) {
+
+        boolean existe = ventaRepository.existsByNumeroMesaAndEstado(
+                numeroMesa,
+                EstadoVenta.ABIERTA
+        );
+
+        if (existe) {
+            throw new RuntimeException("Ya existe una cuenta abierta para esta mesa");
+        }
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Venta venta = new Venta();
+        venta.setNumeroMesa(numeroMesa);
+        venta.setFecha(LocalDateTime.now());
+        venta.setEstado(EstadoVenta.ABIERTA);
+        venta.setUsuario(usuario);
+        venta.setTotal(0.0);
+
+        return ventaRepository.save(venta);
+    }
+    
+    //Obtenemos las cuentas abiertas por usuario
+    public List<Venta> obtenerCuentasAbiertasPorUsuario(Long usuarioId) {
+        return ventaRepository.findByUsuarioIdAndEstado(
+                usuarioId,
+                EstadoVenta.ABIERTA
+        );
+    }
 
     // Registrar una nueva venta
     @Transactional
     public Venta realizarVenta(Venta venta) {
         // Set default status
-        venta.setEstado("En espera");
+        venta.setEstado(EstadoVenta.FINALIZADA);
         venta.setFecha(LocalDateTime.now()); // Ajustar fecha/tiempo actual
         double totalVenta = 0;
 
@@ -93,7 +133,7 @@ public class VentaService {
         }
 
         // Cambiar estado a "Eliminada"
-        venta.setEstado("Eliminada");
+        venta.setEstado(EstadoVenta.ELIMINADA);
         ventaRepository.save(venta);
 
         // Generar ticket de venta eliminada
@@ -104,40 +144,55 @@ public class VentaService {
 
     
     public List<VentaDTO> obtenerOrdenesPendientes() {
-        List<String> estadosPermitidos = List.of("En espera", "En preparación");
-        List<Venta> ventas = ventaRepository.findByEstadoIn(estadosPermitidos);
 
-        return ventas.stream().map(venta -> {
-            VentaDTO dto = new VentaDTO();
-            dto.setId(venta.getId());
-            dto.setNumeroMesa(venta.getNumeroMesa());
-            dto.setEstado(venta.getEstado());
+    List<EstadoVenta> estadosPermitidos = List.of(
+        EstadoVenta.ABIERTA,
+        EstadoVenta.EN_PREPARACION
+    );
 
-            List<ItemDTO> items = venta.getDetalles().stream().map(detalle -> {
-                ItemDTO item = new ItemDTO();
-                item.setNombreProducto(detalle.getProducto().getNombre());
-                item.setCantidad(detalle.getCantidad());
-                item.setSuborden(detalle.getSuborden() != null ? detalle.getSuborden() : 0);
-                return item;
-            }).collect(Collectors.toList());
+    List<Venta> ventas = ventaRepository.findByEstadoIn(estadosPermitidos);
 
-            dto.setProductos(items);
-            return dto;
+    return ventas.stream().map(venta -> {
+        VentaDTO dto = new VentaDTO();
+        dto.setId(venta.getId());
+        dto.setNumeroMesa(venta.getNumeroMesa());
+        dto.setEstado(venta.getEstado().name()); // 👈 convertir enum a String para el DTO
+
+        List<ItemDTO> items = venta.getDetalles().stream().map(detalle -> {
+            ItemDTO item = new ItemDTO();
+            item.setNombreProducto(detalle.getProducto().getNombre());
+            item.setCantidad(detalle.getCantidad());
+            item.setSuborden(detalle.getSuborden() != null ? detalle.getSuborden() : 0);
+            return item;
         }).collect(Collectors.toList());
-    }
+
+        dto.setProductos(items);
+        return dto;
+    }).collect(Collectors.toList());
+}
 
     
-    public void actualizarEstado(Long idVenta, String nuevoEstado) {
-        Optional<Venta> ventaOptional = ventaRepository.findById(idVenta);
+    public void actualizarEstado(Long idVenta, EstadoVenta nuevoEstado) {
+    Optional<Venta> ventaOptional = ventaRepository.findById(idVenta);
 
-        if (ventaOptional.isPresent()) {
-            Venta venta = ventaOptional.get();
-            venta.setEstado(nuevoEstado);
-            ventaRepository.save(venta);
-        } else {
-            throw new RuntimeException("Venta no encontrada con ID: " + idVenta);
-        }
+    if (ventaOptional.isPresent()) {
+        Venta venta = ventaOptional.get();
+        venta.setEstado(nuevoEstado);
+        ventaRepository.save(venta);
+    } else {
+        throw new RuntimeException("Venta no encontrada con ID: " + idVenta);
     }
+}
+    
+    //created today
+    public List<Venta> obtenerVentasAbiertas(Long usuarioId, String rol) {
+
+    if (rol.equals("ADMIN")) {
+        return ventaRepository.findByEstado(EstadoVenta.ABIERTA);
+    }
+
+    return ventaRepository.findByUsuarioIdAndEstado(usuarioId, EstadoVenta.ABIERTA);
+}
 
     
 }

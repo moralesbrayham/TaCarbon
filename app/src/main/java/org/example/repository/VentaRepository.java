@@ -1,5 +1,6 @@
 package org.example.repository;
 
+import org.example.model.EstadoVenta;
 import org.example.model.Venta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Repository
 public interface VentaRepository extends JpaRepository<Venta, Long> {
@@ -22,6 +24,12 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
     @Query("SELECT SUM(v.total) FROM Venta v WHERE v.fecha BETWEEN :inicio AND :fin")
     Double obtenerTotalIngresos(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
     
-    List<Venta> findByEstadoIn(List<String> estados);
+    List<Venta> findByEstadoIn(List<EstadoVenta> estados);
+
+    boolean existsByNumeroMesaAndEstado(Integer numeroMesa, EstadoVenta estado);
+
+    List<Venta> findByUsuarioIdAndEstado(Long usuarioId, EstadoVenta estado);
+
+    List<Venta> findByEstado(EstadoVenta estado);
 
 }
