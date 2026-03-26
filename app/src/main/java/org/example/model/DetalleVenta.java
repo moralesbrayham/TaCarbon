@@ -1,7 +1,6 @@
 package org.example.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.*;
 
 @Entity
@@ -13,7 +12,7 @@ public class DetalleVenta {
 
     @ManyToOne
     @JoinColumn(name = "venta_id", nullable = false)
-    @JsonBackReference  // Prevent infinite recursion
+    @JsonBackReference
     private Venta venta; //Reference to venta
 
     @ManyToOne
@@ -22,11 +21,25 @@ public class DetalleVenta {
 
     private Integer cantidad;
     
+    private String nota;
+    
     private Double precio;
 
     private Double subtotal;
     
     private Integer suborden;
+    
+    private Boolean enviadoCocina = false;
+
+    @Enumerated(EnumType.STRING)
+    private EstadoCocina estadoCocina;
+
+    public enum EstadoCocina {
+        EN_ESPERA,
+        EN_PREPARACION,
+        LISTO,
+        ENTREGADO
+    }
 
     // Getters y Setters
     public Long getId() { return id; }
@@ -49,6 +62,15 @@ public class DetalleVenta {
 
     public Integer getSuborden() { return suborden; }
     public void setSuborden(Integer Suborden) { this.suborden = Suborden; }
+    
+    public Boolean getEnviadoCocina() { return enviadoCocina; }
+    public void setEnviadoCocina(Boolean enviadoCocina) { this.enviadoCocina = enviadoCocina; }
+
+    public EstadoCocina getEstadoCocina() { return estadoCocina; }
+    public void setEstadoCocina(EstadoCocina estadoCocina) { this.estadoCocina = estadoCocina; }
+    
+    public String getNota() { return nota; }
+    public void setNota(String nota) { this.nota = nota; }
     
 }
 

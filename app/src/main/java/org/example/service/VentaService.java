@@ -9,6 +9,7 @@ import org.example.model.Venta;
 import org.example.repository.ProductoRepository;
 import org.example.repository.UsuarioRepository;
 import org.example.repository.VentaRepository;
+import org.example.repository.DetalleVentaRepository;
 
 import org.example.dto.VentaDTO;
 import org.example.dto.ItemDTO;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.example.dto.CocinaDTO;
 
 @Service
 public class VentaService {
@@ -33,6 +35,9 @@ public class VentaService {
     
     @Autowired
     private UsuarioRepository usuarioRepository;
+    
+    @Autowired
+    private DetalleVentaRepository detalleVentaRepository;
     
     // Obtener todas las ventas
     public List<Venta> obtenerTodasLasVentas() {
@@ -193,6 +198,33 @@ public class VentaService {
 
     return ventaRepository.findByUsuarioIdAndEstado(usuarioId, EstadoVenta.ABIERTA);
 }
+    
+        public List<CocinaDTO> obtenerParaCocina() {
+
+        return detalleVentaRepository.findByEstadoCocinaIn(
+                List.of(
+                    DetalleVenta.EstadoCocina.EN_ESPERA,
+                    DetalleVenta.EstadoCocina.EN_PREPARACION
+                )
+        ).stream().map(d -> {
+
+            CocinaDTO dto = new CocinaDTO();
+
+            dto.setId(d.getId());
+            dto.setNombreProducto(d.getProducto().getNombre());
+            dto.setCantidad(d.getCantidad());
+            dto.setSuborden(d.getSuborden());
+            dto.setEstadoCocina(d.getEstadoCocina().name());
+
+            dto.setNota(d.getNota()); // 🔥 IMPORTANTE
+
+            dto.setNumeroMesa(d.getVenta().getNumeroMesa());
+            dto.setVentaId(d.getVenta().getId());
+
+            return dto;
+
+        }).collect(Collectors.toList());
+    }
 
     
 }

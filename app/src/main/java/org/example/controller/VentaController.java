@@ -4,6 +4,7 @@ import org.example.model.EstadoVenta;
 import org.example.model.DetalleVenta;
 import org.example.model.Venta;
 import org.example.service.DetalleVentaService;
+import org.example.repository.DetalleVentaRepository;
 import org.example.service.VentaService;
 import org.example.dto.VentaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.example.dto.CocinaDTO;
 
 @RestController
 @RequestMapping("/api/ventas")
@@ -26,6 +28,9 @@ public class VentaController {
 
     @Autowired
     private VentaService ventaService;
+    
+    @Autowired
+    private DetalleVentaRepository detalleVentaRepository;
 
     // Obtener todas las ventas
     @GetMapping
@@ -45,6 +50,11 @@ public class VentaController {
         return ventaService.obtenerOrdenesPendientes();
     }
     
+    @GetMapping("/cocina")
+    public List<CocinaDTO> obtenerCocina() {
+        return ventaService.obtenerParaCocina();
+    }
+    
     @PutMapping("/{id}/estado")
     public ResponseEntity<?> actualizarEstado(
         @PathVariable Long id,
@@ -61,11 +71,25 @@ public class VentaController {
     //Esto permite que nuestra app android agregue productos a cuentas abiertas usando ventaID
     @PostMapping("/{ventaId}/agregar-producto")
     public ResponseEntity<DetalleVenta> agregarProducto(
-        @PathVariable Long ventaId,
-        @RequestParam Long productoId,
-        @RequestParam Integer cantidad) {
+            @PathVariable Long ventaId,
+            @RequestParam Long productoId,
+            @RequestParam Integer cantidad,
+            @RequestParam Double precio,
+            @RequestParam Double subtotal,
+            @RequestParam Integer suborden,
+            @RequestParam(required = false) String nota
+    ) {
 
-        DetalleVenta detalle = detalleVentaService.agregarProducto(ventaId, productoId, cantidad);
+        DetalleVenta detalle = detalleVentaService.agregarProducto(
+                ventaId,
+                productoId,
+                cantidad,
+                precio,
+                subtotal,
+                suborden,
+                nota
+        );
+
         return ResponseEntity.ok(detalle);
     }
 
@@ -117,6 +141,8 @@ public class VentaController {
         List<Venta> ventas = ventaService.obtenerCuentasAbiertasPorUsuario(usuarioId);
         return ResponseEntity.ok(ventas);
     }
+    
+
     
     
 }

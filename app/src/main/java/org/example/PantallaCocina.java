@@ -67,7 +67,7 @@ public class PantallaCocina extends javax.swing.JFrame {
     
     private void cargarOrdenes() {
         try {
-            URL url = new URL("http://localhost:8080/api/ventas/pendientes");
+            URL url = new URL("http://localhost:8080/api/ventas/cocina");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
@@ -85,161 +85,175 @@ public class PantallaCocina extends javax.swing.JFrame {
         }
     }
     
-private void actualizarPanelOrdenes(String jsonResponse) {
-    panelOrdenes.removeAll();
-    Gson gson = new Gson();
-    List<Map<String, Object>> ordenes = gson.fromJson(jsonResponse, List.class);
+    private void actualizarPanelOrdenes(String jsonResponse) {
 
-    // Ordenar por ID (de menor a mayor, más antiguas primero)
-    ordenes.sort(Comparator.comparing(o -> ((Double) o.get("id"))));
+        panelOrdenes.removeAll();
+        Gson gson = new Gson();
 
-    // Tomar las últimas 8 órdenes (las más recientes al final)
-    // Filtrar solo las órdenes activas (en espera o en preparación)
-    List<Map<String, Object>> ordenesActivas = ordenes.stream()
-        .filter(o -> {
-            String estado = (String) o.get("estado");
-            return estado.equals("En espera") || estado.equals("En preparación");
-        })
-        .limit(8) // Solo las primeras 8 activas
-        .collect(Collectors.toList());
+        List<Map<String, Object>> detalles = gson.fromJson(jsonResponse, List.class);
 
-    ordenes = ordenesActivas;
-
-
-    // Invertir para que la más nueva esté arriba a la izquierda y la más vieja abajo a la derecha
-    Collections.reverse(ordenes);
-
-    panelOrdenes.setLayout(new GridLayout(2, 4, 10, 10)); // 2 filas, 4 columnas, con espacios
-
-    for (Map<String, Object> orden : ordenes) {
-        int id = ((Double) orden.get("id")).intValue();
-        int mesa = ((Double) orden.get("numeroMesa")).intValue();
-        String estado = (String) orden.get("estado");
-
-        JPanel card = new JPanel(new BorderLayout());
-        card.setBorder(BorderFactory.createTitledBorder("Orden #" + id + " - Mesa " + mesa));
-
-        // Procesar productos
-        List<Map<String, Object>> productos = (List<Map<String, Object>>) orden.get("productos");
-        StringBuilder detalles = new StringBuilder();
-
-        for (Map<String, Object> producto : productos) {
-            String nombre = producto.get("nombreProducto") != null ? producto.get("nombreProducto").toString() : "Desconocido";
-            int cantidad = 0;
-            if (producto.get("cantidad") instanceof Number) {
-                cantidad = ((Number) producto.get("cantidad")).intValue();
-                
-            }
-
-
-            Object subordenObj = producto.get("suborden");
-            String suborden = "N/A";
-            if (subordenObj instanceof Number) {
-            suborden = String.valueOf(((Number) subordenObj).intValue());
-            }
-
-            detalles.append("Plato ").append(suborden).append(": ")
-            .append(nombre).append(" x").append(cantidad).append("\n");
-
-
+        if (detalles == null || detalles.isEmpty()) {
+            panelOrdenes.revalidate();
+            panelOrdenes.repaint();
+            return;
         }
 
+        // 🔥 1. Agrupar por ventaId
+        Map<Double, List<Map<String, Object>>> agrupadas = detalles.stream()
+            .filter(d -> d.get("ventaId") != null)
+            .collect(Collectors.groupingBy(d -> (Double) d.get("ventaId")));
 
-        JTextArea areaDetalles = new JTextArea(detalles.toString());
-        areaDetalles.setFont(new Font("Arial", Font.PLAIN, 18));
-        areaDetalles.setEditable(false);
+        // 🔥 2. Orden FIFO (más antiguas primero)
+        List<Double> ventasOrdenadas = agrupadas.keySet().stream()
+            .sorted()
+            .limit(8) // máximo 8 órdenes
+            .collect(Collectors.toList());
 
-        JButton btnEstado = new JButton(estado);
-        btnEstado.setPreferredSize(new Dimension(150, 30));
-        btnEstado.addActionListener(e -> cambiarEstado(id, btnEstado));
+        // 🔥 3. Invertir para UI (más nueva arriba izquierda)
+        Collections.reverse(ventasOrdenadas);
 
-        // Estilo de botón
-        btnEstado.setFont(new Font("Arial", Font.BOLD, 16));
-        btnEstado.setForeground(Color.WHITE);
-        switch (estado) {
-            case "En espera":
-                btnEstado.setBackground(Color.ORANGE);
-                break;
-            case "En preparación":
-                btnEstado.setBackground(Color.BLUE);
-                break;
-            case "Orden lista":
-                btnEstado.setBackground(Color.GREEN.darker());
-                break;
-            default:
-                btnEstado.setBackground(Color.GRAY);
+        // 🔥 Layout 2x4
+        panelOrdenes.setLayout(new GridLayout(2, 4, 10, 10));
+
+        // 🔥 4. Construir tarjetas
+        for (Double ventaId : ventasOrdenadas) {
+
+            List<Map<String, Object>> lista = agrupadas.get(ventaId);
+
+            if (lista == null || lista.isEmpty()) continue;
+
+            Map<String, Object> primerDetalle = lista.get(0);
+
+            int mesa = primerDetalle.get("numeroMesa") != null
+                    ? ((Double) primerDetalle.get("numeroMesa")).intValue()
+                    : 0;
+
+            JPanel card = new JPanel(new BorderLayout());
+            card.setBorder(BorderFactory.createTitledBorder(
+                "Orden #" + ventaId.intValue() + " - Mesa " + mesa
+            ));
+
+            StringBuilder detallesTexto = new StringBuilder();
+
+            // 🔥 5. Recorrer productos
+            for (Map<String, Object> d : lista) {
+
+                String nombre = d.get("nombreProducto") != null
+                        ? d.get("nombreProducto").toString()
+                        : "Desconocido";
+
+                int cantidad = d.get("cantidad") != null
+                        ? ((Double) d.get("cantidad")).intValue()
+                        : 0;
+
+                String nota = d.get("nota") != null
+                        ? d.get("nota").toString()
+                        : "";
+
+                int suborden = d.get("suborden") != null
+                        ? ((Double) d.get("suborden")).intValue()
+                        : 0;
+
+                detallesTexto.append("P").append(suborden)
+                    .append(": ")
+                    .append(nombre)
+                    .append(" x")
+                    .append(cantidad);
+
+                if (!nota.isEmpty()) {
+                    detallesTexto.append(" (").append(nota).append(")");
+                }
+
+                detallesTexto.append("\n");
+            }
+
+            JTextArea area = new JTextArea(detallesTexto.toString());
+            area.setFont(new Font("Arial", Font.PLAIN, 16));
+            area.setEditable(false);
+
+            // 🔥 6. Estado (tomamos el primero como referencia)
+            String estado = lista.get(0).get("estadoCocina") != null
+                    ? lista.get(0).get("estadoCocina").toString()
+                    : "EN_ESPERA";
+
+            JButton btnEstado = new JButton(estado);
+
+            // 🔥 Acción botón
+            btnEstado.addActionListener(e -> cambiarEstadoDetalle(lista, btnEstado));
+
+            // 🔥 Estilo botón
+            btnEstado.setFont(new Font("Arial", Font.BOLD, 14));
+            btnEstado.setForeground(Color.WHITE);
+
+            switch (estado) {
+                case "EN_ESPERA":
+                    btnEstado.setBackground(Color.ORANGE);
+                    break;
+                case "EN_PREPARACION":
+                    btnEstado.setBackground(Color.BLUE);
+                    break;
+                case "LISTO":
+                    btnEstado.setBackground(Color.GREEN.darker());
+                    break;
+                default:
+                    btnEstado.setBackground(Color.GRAY);
+            }
+
+            JPanel bottom = new JPanel(new FlowLayout());
+            bottom.add(btnEstado);
+
+            card.add(area, BorderLayout.CENTER);
+            card.add(bottom, BorderLayout.SOUTH);
+
+            panelOrdenes.add(card);
         }
 
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        bottomPanel.add(btnEstado);
-
-        card.add(areaDetalles, BorderLayout.CENTER);
-        card.add(bottomPanel, BorderLayout.SOUTH);
-
-        panelOrdenes.add(card);
+        panelOrdenes.revalidate();
+        panelOrdenes.repaint();
     }
 
-    panelOrdenes.revalidate();
-    panelOrdenes.repaint();
-}
-
     
-    private void cambiarEstado(int idOrden, JButton boton) {
+    private void cambiarEstadoDetalle(List<Map<String, Object>> detalles, JButton boton) {
+
         String estadoActual = boton.getText();
         String nuevoEstado;
 
-        // Lógica para decidir el siguiente estado
         switch (estadoActual) {
-            case "En espera":
-                nuevoEstado = "En preparación";
+            case "EN_ESPERA":
+                nuevoEstado = "EN_PREPARACION";
                 break;
-            case "En preparación":
-                nuevoEstado = "Orden lista";
+            case "EN_PREPARACION":
+                nuevoEstado = "LISTO";
                 break;
-            case "Orden lista":
-                // Ya está lista, no hacer nada o volver a "En espera" si quieres ciclo
-                return;
             default:
-                nuevoEstado = "En espera";
-    }
+                return;
+        }
 
         try {
-            URL url = new URL("http://localhost:8080/api/ventas/" + idOrden + "/estado");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("PUT");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setDoOutput(true);
 
-            String cuerpo = "{\"estado\":\"" + nuevoEstado + "\"}";
+            for (Map<String, Object> d : detalles) {
 
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(cuerpo.getBytes("utf-8"));
-            }
+                int id = ((Double) d.get("id")).intValue();
 
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                boton.setText(nuevoEstado);
+                URL url = new URL("http://localhost:8080/api/ventas/detalle/" + id + "/estado");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-                // Estilo del botón actualizado
-                boton.setFont(new Font("Arial", Font.BOLD, 16));
-                boton.setForeground(Color.WHITE);
+                conn.setRequestMethod("PUT");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
 
-                switch (nuevoEstado) {
-                    case "En espera":
-                        boton.setBackground(Color.ORANGE);
-                        break;
-                    case "En preparación":
-                        boton.setBackground(Color.BLUE);
-                        break;
-                    case "Orden lista":
-                        boton.setBackground(Color.GREEN.darker());
-                        JOptionPane.showMessageDialog(this, "¡Orden #" + idOrden + " está lista!");
-                        break;
-                    default:
-                        boton.setBackground(Color.GRAY);
+                String body = "{\"estadoCocina\":\"" + nuevoEstado + "\"}";
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    os.write(body.getBytes("utf-8"));
                 }
+
+                conn.getResponseCode();
+                conn.disconnect();
             }
 
-            conn.disconnect();
+            boton.setText(nuevoEstado);
+
         } catch (Exception e) {
             System.out.println("Error al cambiar estado: " + e.getMessage());
         }
