@@ -13,6 +13,7 @@ import org.example.repository.VentaRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DetalleVentaService {
@@ -59,5 +60,18 @@ public class DetalleVentaService {
         detalle.setEstadoCocina(DetalleVenta.EstadoCocina.EN_ESPERA);
 
         return detalleVentaRepository.save(detalle);
+    }
+    
+    @Transactional
+    public void actualizarEstadoDetalle(Long id, String estado) {
+
+        DetalleVenta detalle = detalleVentaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Detalle no encontrado"));
+
+        detalle.setEstadoCocina(
+                DetalleVenta.EstadoCocina.valueOf(estado)
+        );
+
+        detalleVentaRepository.save(detalle);
     }
 }

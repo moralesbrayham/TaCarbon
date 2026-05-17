@@ -68,6 +68,19 @@ public class VentaController {
         return ResponseEntity.ok().build();
     }
     
+    @PutMapping("/detalle/{id}/estado")
+    public ResponseEntity<?> actualizarEstadoDetalle(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body
+    ) {
+
+        String estado = body.get("estadoCocina");
+
+        detalleVentaService.actualizarEstadoDetalle(id, estado);
+
+        return ResponseEntity.ok().build();
+    }
+    
     //Esto permite que nuestra app android agregue productos a cuentas abiertas usando ventaID
     @PostMapping("/{ventaId}/agregar-producto")
     public ResponseEntity<DetalleVenta> agregarProducto(
