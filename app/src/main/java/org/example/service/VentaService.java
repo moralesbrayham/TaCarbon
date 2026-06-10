@@ -5,58 +5,50 @@ import org.example.model.DetalleVenta;
 import org.example.model.Producto;
 import org.example.model.Usuario;
 import org.example.model.Venta;
-
 import org.example.repository.ProductoRepository;
 import org.example.repository.UsuarioRepository;
 import org.example.repository.VentaRepository;
 import org.example.repository.DetalleVentaRepository;
-
 import org.example.dto.VentaDTO;
 import org.example.dto.ItemDTO;
-
-import org.springframework.transaction.annotation.Transactional;
+import org.example.dto.CocinaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.example.dto.CocinaDTO;
 
 @Service
 public class VentaService {
-    
+
     @Autowired
-    private  VentaRepository ventaRepository;
+    private VentaRepository ventaRepository;
 
     @Autowired
     private ProductoRepository productoRepository;
-    
+
     @Autowired
     private UsuarioRepository usuarioRepository;
-    
+
     @Autowired
     private DetalleVentaRepository detalleVentaRepository;
-    
-    // Obtener todas las ventas
+
+    @Autowired
+    private TicketService ticketService; // ✅ Inyectado correctamente, sin "new"
+
     public List<Venta> obtenerTodasLasVentas() {
         return ventaRepository.findAll();
     }
 
-    // Obtener una venta por ID
     public Optional<Venta> obtenerVentaPorId(Long id) {
         return ventaRepository.findById(id);
     }
-    
-    //Crear venta que quedara en cuenta abierta
+
     public Venta crearVentaAbierta(Long usuarioId, Integer numeroMesa) {
-
         boolean existe = ventaRepository.existsByNumeroMesaAndEstado(
-                numeroMesa,
-                EstadoVenta.ABIERTA
-        );
-
+                numeroMesa, EstadoVenta.ABIERTA);
         if (existe) {
             throw new RuntimeException("Ya existe una cuenta abierta para esta mesa");
         }
@@ -73,21 +65,19 @@ public class VentaService {
 
         return ventaRepository.save(venta);
     }
-    
-    //Obtenemos las cuentas abiertas por usuario
-    public List<Venta> obtenerCuentasAbiertasPorUsuario(Long usuarioId) {
-        return ventaRepository.findByUsuarioIdAndEstado(
-                usuarioId,
-                EstadoVenta.ABIERTA
-        );
+
+    // ✅ Un solo método para ventas abiertas — ADMIN ve todas, otros solo las suyas
+    public List<Venta> obtenerVentasAbiertas(Long usuarioId, String rol) {
+        if ("ADMIN".equals(rol)) {
+            return ventaRepository.findByEstado(EstadoVenta.ABIERTA);
+        }
+        return ventaRepository.findByUsuarioIdAndEstado(usuarioId, EstadoVenta.ABIERTA);
     }
 
-    // Registrar una nueva venta
     @Transactional
     public Venta realizarVenta(Venta venta) {
-        // Set default status
         venta.setEstado(EstadoVenta.FINALIZADA);
-        venta.setFecha(LocalDateTime.now()); // Ajustar fecha/tiempo actual
+        venta.setFecha(LocalDateTime.now());
         double totalVenta = 0;
 
         for (DetalleVenta detalle : venta.getDetalles()) {
@@ -95,136 +85,115 @@ public class VentaService {
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
             if (producto.getStock() < detalle.getCantidad()) {
-                throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre());
+                throw new RuntimeException("Stock insuficiente para: " + producto.getNombre());
             }
 
-            // Restar la cantidad vendida del stock disponible
             producto.setStock(producto.getStock() - detalle.getCantidad());
             productoRepository.save(producto);
 
-            // Asociar el producto y calcular subtotal
             detalle.setProducto(producto);
             detalle.setSubtotal(producto.getPrecio() * detalle.getCantidad());
-            detalle.setVenta(venta);  // Asociar el detalle con la venta
-
+            detalle.setVenta(venta);
             totalVenta += detalle.getSubtotal();
         }
 
-        // Setear total de la venta
         venta.setTotal(totalVenta);
-
-        // Guardar la venta (cascada también guardará los detalles)
         Venta nuevaVenta = ventaRepository.save(venta);
 
-        // Generar ticket en PDF
-        TicketService ticketService = new TicketService();
-        String ticketPath = ticketService.generarTicketPDF(nuevaVenta);
+        String ticketPath = ticketService.generarTicketPDF(nuevaVenta); // ✅ Sin "new"
         System.out.println("Ticket generado en: " + ticketPath);
 
         return nuevaVenta;
-
     }
 
     @Transactional
     public void eliminarVenta(Long id) {
-     Venta venta = ventaRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id));
+        Venta venta = ventaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id));
 
-        // Restaurar stock por cada producto vendido
         for (DetalleVenta detalle : venta.getDetalles()) {
             Producto producto = detalle.getProducto();
             producto.setStock(producto.getStock() + detalle.getCantidad());
             productoRepository.save(producto);
         }
 
-        // Cambiar estado a "Eliminada"
         venta.setEstado(EstadoVenta.ELIMINADA);
         ventaRepository.save(venta);
 
-        // Generar ticket de venta eliminada
-     TicketService ticketService = new TicketService();
-     String path = ticketService.generarTicketEliminadoPDF(venta);
-        System.out.println("Ticket de venta eliminada generado en: " + path);
+        String path = ticketService.generarTicketEliminadoPDF(venta); // ✅ Sin "new"
+        System.out.println("Ticket eliminado generado en: " + path);
     }
 
-    
     public List<VentaDTO> obtenerOrdenesPendientes() {
+        List<Venta> ventas = ventaRepository.findByEstadoIn(
+                List.of(EstadoVenta.ABIERTA, EstadoVenta.EN_PREPARACION));
 
-    List<EstadoVenta> estadosPermitidos = List.of(
-        EstadoVenta.ABIERTA,
-        EstadoVenta.EN_PREPARACION
-    );
+        return ventas.stream().map(venta -> {
+            VentaDTO dto = new VentaDTO();
+            dto.setId(venta.getId());
+            dto.setNumeroMesa(venta.getNumeroMesa());
+            dto.setEstado(venta.getEstado().name());
 
-    List<Venta> ventas = ventaRepository.findByEstadoIn(estadosPermitidos);
+            List<ItemDTO> items = venta.getDetalles().stream().map(detalle -> {
+                ItemDTO item = new ItemDTO();
+                item.setNombreProducto(detalle.getProducto().getNombre());
+                item.setCantidad(detalle.getCantidad());
+                item.setSuborden(detalle.getSuborden() != null ? detalle.getSuborden() : 0);
+                return item;
+            }).collect(Collectors.toList());
 
-    return ventas.stream().map(venta -> {
-        VentaDTO dto = new VentaDTO();
-        dto.setId(venta.getId());
-        dto.setNumeroMesa(venta.getNumeroMesa());
-        dto.setEstado(venta.getEstado().name()); // 👈 convertir enum a String para el DTO
-
-        List<ItemDTO> items = venta.getDetalles().stream().map(detalle -> {
-            ItemDTO item = new ItemDTO();
-            item.setNombreProducto(detalle.getProducto().getNombre());
-            item.setCantidad(detalle.getCantidad());
-            item.setSuborden(detalle.getSuborden() != null ? detalle.getSuborden() : 0);
-            return item;
+            dto.setProductos(items);
+            return dto;
         }).collect(Collectors.toList());
+    }
 
-        dto.setProductos(items);
-        return dto;
-    }).collect(Collectors.toList());
-}
-
-    
     public void actualizarEstado(Long idVenta, EstadoVenta nuevoEstado) {
-    Optional<Venta> ventaOptional = ventaRepository.findById(idVenta);
-
-    if (ventaOptional.isPresent()) {
-        Venta venta = ventaOptional.get();
+        Venta venta = ventaRepository.findById(idVenta)
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + idVenta));
         venta.setEstado(nuevoEstado);
         ventaRepository.save(venta);
-    } else {
-        throw new RuntimeException("Venta no encontrada con ID: " + idVenta);
-    }
-}
-    
-    //created today
-    public List<Venta> obtenerVentasAbiertas(Long usuarioId, String rol) {
-
-    if (rol.equals("ADMIN")) {
-        return ventaRepository.findByEstado(EstadoVenta.ABIERTA);
     }
 
-    return ventaRepository.findByUsuarioIdAndEstado(usuarioId, EstadoVenta.ABIERTA);
-}
-    
-        public List<CocinaDTO> obtenerParaCocina() {
-
+    public List<CocinaDTO> obtenerParaCocina() {
         return detalleVentaRepository.findByEstadoCocinaIn(
-                List.of(
-                    DetalleVenta.EstadoCocina.EN_ESPERA,
-                    DetalleVenta.EstadoCocina.EN_PREPARACION
-                )
+                List.of(DetalleVenta.EstadoCocina.EN_ESPERA,
+                        DetalleVenta.EstadoCocina.EN_PREPARACION)
         ).stream().map(d -> {
-
             CocinaDTO dto = new CocinaDTO();
-
             dto.setId(d.getId());
             dto.setNombreProducto(d.getProducto().getNombre());
             dto.setCantidad(d.getCantidad());
             dto.setSuborden(d.getSuborden());
             dto.setEstadoCocina(d.getEstadoCocina().name());
-
-            dto.setNota(d.getNota()); // 🔥 IMPORTANTE
-
+            dto.setNota(d.getNota());
             dto.setNumeroMesa(d.getVenta().getNumeroMesa());
             dto.setVentaId(d.getVenta().getId());
-
             return dto;
-
         }).collect(Collectors.toList());
     }
-
     
+    @Transactional
+    public Venta finalizarVentaAbierta(Long ventaId, Long usuarioId, Integer numeroMesa) {
+        Venta venta = ventaRepository.findById(ventaId)
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + ventaId));
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+
+        venta.setUsuario(usuario);
+        venta.setEstado(EstadoVenta.FINALIZADA);
+        venta.setFecha(LocalDateTime.now());
+
+        double total = venta.getDetalles().stream()
+                .mapToDouble(d -> d.getPrecio() * d.getCantidad())
+                .sum();
+        venta.setTotal(total);
+
+        Venta ventaFinalizada = ventaRepository.save(venta);
+
+        String ticketPath = ticketService.generarTicketPDF(ventaFinalizada);
+        System.out.println("Ticket generado en: " + ticketPath);
+
+        return ventaFinalizada;
+    }
 }

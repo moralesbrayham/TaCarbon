@@ -8,12 +8,12 @@ import javax.swing.JOptionPane;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 
 /**
  *
  * @author moral
  */
+
 public class LoginForm extends javax.swing.JFrame {
     
     /**
@@ -172,7 +172,7 @@ public class LoginForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnIniciarSesionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarSesionActionPerformed
-    String correo = txtCorreo.getText().trim();
+     String correo = txtCorreo.getText().trim();
     String contraseña = new String(txtContraseña.getPassword()).trim();
 
     if (correo.isEmpty() || contraseña.isEmpty()) {
@@ -181,23 +181,19 @@ public class LoginForm extends javax.swing.JFrame {
     }
 
     try {
-        // Create the HTTP request
         URL url = new URL("http://localhost:8080/api/usuarios/login");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        conn.setRequestProperty("Content-Type", "application/json"); // ✅ JSON
         conn.setDoOutput(true);
 
-        // Send request body
-        String params = "correo=" + URLEncoder.encode(correo, "UTF-8") +
-                        "&contraseña=" + URLEncoder.encode(contraseña, "UTF-8");
-
+        // ✅ Enviar como JSON
+        String jsonBody = "{\"correo\":\"" + correo + "\",\"contraseña\":\"" + contraseña + "\"}";
         try (OutputStream os = conn.getOutputStream()) {
-            byte[] input = params.getBytes("utf-8");
+            byte[] input = jsonBody.getBytes("utf-8");
             os.write(input, 0, input.length);
         }
 
-        // Read response
         int responseCode = conn.getResponseCode();
         if (responseCode == HttpURLConnection.HTTP_OK) {
             JOptionPane.showMessageDialog(this, "Inicio de sesión exitoso!");
@@ -210,7 +206,6 @@ public class LoginForm extends javax.swing.JFrame {
     } catch (Exception ex) {
         JOptionPane.showMessageDialog(this, "Error al autenticar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
-
     }//GEN-LAST:event_btnIniciarSesionActionPerformed
 
     /**
