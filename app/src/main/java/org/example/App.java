@@ -16,6 +16,8 @@ import javax.swing.SwingUtilities;
 @EntityScan(basePackages = "org.example.model")
 public class App {
     public static void main(String[] args) {
+        System.setProperty("java.awt.headless", "false"); // ✅ permite ventanas Swing
+
         ConfigurableApplicationContext context = SpringApplication.run(App.class, args);
 
         SwingUtilities.invokeLater(() -> {
@@ -24,4 +26,3 @@ public class App {
         });
     }
 }
-

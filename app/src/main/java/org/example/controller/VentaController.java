@@ -2,6 +2,7 @@ package org.example.controller;
 
 import org.example.model.EstadoVenta;
 import org.example.model.DetalleVenta;
+import org.example.dto.FinalizarVentaRequestDTO;
 import org.example.model.Venta;
 import org.example.service.DetalleVentaService;
 import org.example.service.VentaService;
@@ -88,13 +89,10 @@ public class VentaController {
     }
     
     @PostMapping("/finalizar")
-    public ResponseEntity<?> finalizarVentaDesdeApp(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> finalizarVentaDesdeApp(@RequestBody FinalizarVentaRequestDTO body) {
         try {
-            Long usuarioId = Long.valueOf(body.get("usuarioId").toString());
-            Integer numeroMesa = Integer.valueOf(body.get("numeroMesa").toString());
-            Long ventaId = Long.valueOf(body.get("ventaId").toString());
-
-            Venta venta = ventaService.finalizarVentaAbierta(ventaId, usuarioId, numeroMesa);
+            Venta venta = ventaService.finalizarVentaAbierta(
+                    body.getVentaId(), body.getUsuarioId(), body.getNumeroMesa());
             return ResponseEntity.ok(venta);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

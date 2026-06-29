@@ -4,6 +4,7 @@
  */
 package org.example;
 
+import org.springframework.stereotype.Component;
 import javax.swing.JOptionPane;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -14,6 +15,7 @@ import java.net.URL;
  * @author moral
  */
 
+@Component
 public class LoginForm extends javax.swing.JFrame {
     
     /**
